@@ -1,6 +1,7 @@
 using Aqar.Data.DataLayer;
 using Aqar.Data.Model;
 using Aqar.Infrastructure.AutoMapper;
+using Aqar.Infrastructure.HelperServices.EmailHelper;
 using Aqar.Infrastructure.HelperServices.ImageHelper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -45,6 +46,7 @@ namespace Aqar.Infrastructure.DataLayer
 
             services.AddAutoMapper(typeof(MappingProfile).Assembly);
             services.AddScoped<IImageService, ImageService>();
+            services.AddScoped<IEmailService,EmailService>();
 
             return services;
 

@@ -4,7 +4,9 @@ using Aqar.Core.Enums;
 using Aqar.Data.DataLayer;
 using Aqar.Data.Model;
 using Aqar.Infrastructure.Exceptions;
+using Aqar.Infrastructure.HelperServices.EmailHelper;
 using AutoMapper;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -21,13 +23,17 @@ namespace Aqar.Infrastructure.Managers.Auth
         //private readonly IEmailService _emailService;
         private readonly IMapper _mapper;
         private readonly AqarDbContext _context;
+        private readonly IEmailService _emailService;
+        public enum EmailCategories { Registration, ForgetPassword, VerifyEmail } //Sending email in the different situations
+
         public AuthRepository(IConfiguration configuration, UserManager<AppUser> userManager,
-            IMapper mapper, AqarDbContext context)
+            IMapper mapper, AqarDbContext context,IEmailService emailService)
         {
             _configuration = configuration;
             _userManager = userManager;
             _mapper = mapper;
             _context = context;
+            _emailService = emailService;
         }
 
         public async Task<AuthenticationResponse> RegisterUserAsync(RegisterRequest model)
@@ -48,9 +54,11 @@ namespace Aqar.Infrastructure.Managers.Auth
 
                 };
                 var result = await _userManager.CreateAsync(user, model.Password);
+
                 if (result.Succeeded)
                 {
                     await _userManager.AddToRoleAsync(user, RolesName.OfficeOwner);
+
                  }
 
                 var token = await Generate(user);
@@ -83,8 +91,7 @@ namespace Aqar.Infrastructure.Managers.Auth
             throw  new ServiceValidationException("Invlid inserted data");
 
         }
-
-
+        
         public async Task<AuthenticationResponse> Login(LoginRequest request)
         {
 
@@ -125,7 +132,7 @@ namespace Aqar.Infrastructure.Managers.Auth
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
 
-            var Expiration = DateTime.Now.AddHours(1);
+            var Expiration = DateTime.Now.AddMinutes(1);
 
 
             // token 
@@ -135,15 +142,46 @@ namespace Aqar.Infrastructure.Managers.Auth
                claims: claims,
                expires: Expiration,
                signingCredentials: cred);
-
+             
             return new AuthenticationResponse
             {
-                Token = new JwtSecurityTokenHandler().WriteToken(token),
+                Token = $"Bearer {new JwtSecurityTokenHandler().WriteToken(token)}",
                 Expiration = Expiration
             };
         }
 
-     
+
+        //private void SendEmail(AppUser user, EmailCategories emailCategories)
+        //{
+        //    var emailDto = new EmailDto();
+        //    emailDto.To = user.Email;
+
+        //    switch (emailCategories)
+        //    {
+        //        case EmailCategories.Registration:
+        //            {
+        //                emailDto.Subject = "Thank you for the registration";
+        //                emailDto.Body = $"This is your verify token : {user.VerificationToken}";
+        //                break;
+        //            }
+        //        case EmailCategories.ForgetPassword:
+        //            {
+        //                emailDto.Subject = "You can reset your password now";
+        //                emailDto.Body = $"This is your reset token : {user.PasswordResetToken}. \n Please reset your password before {user.ResetTokenExpires}";
+        //                break;
+        //            }
+        //        case EmailCategories.VerifyEmail:
+        //            {
+        //                emailDto.Subject = "Thanks for confirming your email";
+        //                emailDto.Body = $"Your account has been verified at : {user.VerifiedAt}";
+        //                break;
+        //            }
+        //        default:
+        //            break;
+        //    }
+
+        //    _emailService.SendEmail(emailDto);
+        //}
 
         private string GenratePassword()
         {
