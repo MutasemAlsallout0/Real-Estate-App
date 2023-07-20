@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace Aqar.Data.Model
 {
     public class Following
@@ -12,7 +8,8 @@ namespace Aqar.Data.Model
         public int PublicPageId  { get; set; }
 
         public PublicPage? PublicPage { get; set; }
+        public bool IsFollow { get; set; }
 
-         
+
     }
 }
