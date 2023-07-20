@@ -27,5 +27,42 @@ namespace Aqar.Controllers
         {
             return Ok(await _authRepository.RegisterUserAsync(model));
         }
+
+
+        [HttpPost("resetPassword")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordRequest model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var result = await _authRepository.SendResetPasswordEmailAsync(model.Email);
+
+            if (result)
+            {
+                return Ok(new { Message = "تم إرسال رابط إعادة تعيين كلمة المرور بنجاح. يرجى التحقق من بريدك الإلكتروني." });
+            }
+
+            return BadRequest(new { Message = "تعذر إرسال رابط إعادة تعيين كلمة المرور. يُرجى التحقق من صحة البريد الإلكتروني والتأكد من أنه مؤكد." });
+        }
+
+        [HttpPost("confirmPasswordReset")]
+        public async Task<IActionResult> ConfirmPasswordReset(ConfirmPasswordResetRequest model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var result = await _authRepository.ResetPasswordAsync(model.Email, model.Token, model.NewPassword);
+
+            if (result)
+            {
+                return Ok(new { Message = "تم إعادة تعيين كلمة المرور بنجاح." });
+            }
+
+            return BadRequest(new { Message = "فشل في إعادة تعيين كلمة المرور. يُرجى التحقق من صحة الرابط وإدخال كلمة مرور جديدة صحيحة." });
+        }
     }
 }

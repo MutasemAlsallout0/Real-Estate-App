@@ -23,6 +23,7 @@
 	</ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Aqar.Core\Aqar.Core.csproj" />
     <ProjectReference Include="..\Aqar.Data\Aqar.Data.csproj" />
     <ProjectReference Include="..\Aqar.Infrastructure\Aqar.Infrastructure.csproj" />
   </ItemGroup>

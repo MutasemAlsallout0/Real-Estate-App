@@ -10,5 +10,7 @@ namespace Aqar.Infrastructure.Managers.Auth
         Task<AuthenticationResponse> Generate(AppUser user);
          Task<AuthenticationResponse> RegisterUserAsync(RegisterRequest model);
         Task<AuthenticationResponse> Login(LoginRequest request);
+        Task<bool> SendResetPasswordEmailAsync(string email);
+        Task<bool> ResetPasswordAsync(string email, string token, string newPassword);
     }
 }
