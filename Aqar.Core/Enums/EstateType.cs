@@ -1,12 +1,19 @@
+﻿
+using System.ComponentModel.DataAnnotations;
 
 namespace Aqar.Core.Enums
 {
     public enum EstateType
     {
-        Building=0,
-        Appartment=1,
-        Warehouse=2,
-        Land=3,
-        Chalet=4,
+        [Display(Name = "بناية")]
+        Building =0,
+        [Display(Name = "منزل")]
+        Appartment =1,
+        [Display(Name = "مخزن")]
+        Warehouse =2,
+        [Display(Name = "أرض")]
+        Land =3,
+        [Display(Name = "شاليه")]
+        Chalet =4,
     }
 }

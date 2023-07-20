@@ -1,5 +1,4 @@
 using Aqar.Core.Enums;
-using System.ComponentModel.DataAnnotations;
 
 namespace Aqar.Data.Model
 {

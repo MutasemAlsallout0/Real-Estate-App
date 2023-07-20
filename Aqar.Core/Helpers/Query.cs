@@ -8,5 +8,6 @@ namespace Aqar.Core.Helpers
     {
         public string GeneralSearch { get; set; }
 
+
     }
 }

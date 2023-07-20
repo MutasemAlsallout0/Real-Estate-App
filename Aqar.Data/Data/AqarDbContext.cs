@@ -15,6 +15,14 @@ namespace Aqar.Data.DataLayer
                 .Entity<AppUser>()
                    .Property(e => e.UserType)
                                .HasConversion<string>();
+            builder
+                 .Entity<Estate>()
+                         .Property(e => e.EstateType)
+                   .HasConversion<string>();
+            builder
+                .Entity<Estate>()
+                      .Property(e => e.ContractType)
+                                  .HasConversion<string>();
             builder.Entity<Following>().HasKey(x => new { x.UserId, x.PublicPageId });
             builder.Entity<Preferences>().HasKey(x => new { x.UserId, x.EstateId });
 
