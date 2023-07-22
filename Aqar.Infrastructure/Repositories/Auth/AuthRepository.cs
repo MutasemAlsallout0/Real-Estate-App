@@ -5,6 +5,7 @@ using Aqar.Data.DataLayer;
 using Aqar.Data.Model;
 using Aqar.Infrastructure.Exceptions;
 using Aqar.Infrastructure.HelperServices.EmailHelper;
+using Aqar.Infrastructure.HelperServices.ImageHelper;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -21,24 +22,29 @@ namespace Aqar.Infrastructure.Managers.Auth
         private readonly UserManager<AppUser> _userManager;
         private readonly IMapper _mapper;
         private readonly AqarDbContext _context;
+        private readonly IImageService _imageService;
         private readonly IEmailService _emailService;
     
       //  public enum EmailCategories { Registration, ForgetPassword, VerifyEmail } //Sending email in the different situations
 
-        public AuthRepository(IConfiguration configuration, UserManager<AppUser> userManager,
-            IMapper mapper, AqarDbContext context,IEmailService emailService)
+        public AuthRepository(IConfiguration configuration, 
+                            UserManager<AppUser> userManager,
+                            IMapper mapper, 
+                            AqarDbContext context,
+                            IEmailService emailService,
+                            IImageService imageService)
         {
             _configuration = configuration;
             _userManager = userManager;
             _mapper = mapper;
             _context = context;
             _emailService = emailService;
-            //_gettoken = gettoken;
-            
+            _imageService = imageService;
+             
         }
 
 
-        public async Task<AuthenticationResponse> RegisterUserAsync(RegisterRequest model)
+        public async Task<AuthenticationResponse> RegisterCustomer(CustomerRegisterRequest model)
         {
 
             //var checkFromDbUser = _userManager.FindByEmailAsync(model.Email);
@@ -46,8 +52,54 @@ namespace Aqar.Infrastructure.Managers.Auth
             //if (checkFromDbUser is not null) throw new Exception("You are already exist !");
             var emailDto = new EmailDto();
 
-            if (model.UserType == UserType.OfficeOwner)
+
+            var user = new AppUser()
             {
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                UserName = model.Email,
+                Email = model.Email,
+                UserType = UserType.Customer,
+                PhoneNumber = model.PhoneNumber,
+                EmailConfirmed = false,
+
+            };
+            if (model.UserImage != null)
+            {
+                user.UserImage = await _imageService.SaveImage(model.UserImage, "Images");
+            }
+            var token = await Generate(user);
+            var verificationUrl = $"https://your-domain.com/verify-email?userId={Uri.EscapeDataString(user.Id)}&token={Uri.EscapeDataString(token.Token)}";
+
+            emailDto.To = user.Email;
+            emailDto.Subject = "Thank you for the registration";
+            emailDto.Body = $"Click the button below to verify your email and activate your account:<br/><br/><a href=\"{verificationUrl}\" style=\"display:inline-block;background-color:#007bff;color:#fff;text-decoration:none;padding:10px 20px;border-radius:4px;\">Verify Email</a>";
+            _emailService.SendEmail(emailDto);
+            user.EmailConfirmed = true;
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+            if (result.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(user, RolesName.Customer);
+            }
+
+
+
+            return new AuthenticationResponse
+            {
+                Token = token.Token, // Include the email verification token in the response
+                LoginUrl = "https://your-domain.com/login" // URL of the login page
+            };
+            throw new ServiceValidationException("Please check information Register");
+
+        }
+
+        public async Task<AuthenticationResponse> RegisterOfficeOwner(OfficeOwnerRegisterRequest model)
+        {
+
+            //var checkFromDbUser = _userManager.FindByEmailAsync(model.Email);
+
+            //if (checkFromDbUser is not null) throw new Exception("You are already exist !");
                 var user = new AppUser()
                 {
                     FirstName = model.FirstName,
@@ -57,17 +109,20 @@ namespace Aqar.Infrastructure.Managers.Auth
                     UserType = UserType.OfficeOwner,
                    PhoneNumber = model.PhoneNumber,
                    OfficeName = model.OfficeName,
-                 //  UserImage = model.UserImage,
                     EmailConfirmed = false,
 
 
                 };
-                // Generate email verification token
-                var token = await Generate(user);
+                if (model.UserImage != null)
+                {
+                    user.UserImage = await _imageService.SaveImage(model.UserImage, "Images");
+                }
+            // Generate email verification token
+            var token = await Generate(user);
 
                 // Build the email verification URL
                 var verificationUrl = $"https://your-domain.com/verify-email?userId={Uri.EscapeDataString(user.Id)}&token={Uri.EscapeDataString(token.Token)}";
-
+                var emailDto = new EmailDto();
                 emailDto.To = user.Email;
                 emailDto.Subject = "Thank you for the registration";
                 emailDto.Body = $"Click the button below to verify your email and activate your account:<br/><br/><a href=\"{verificationUrl}\" style=\"display:inline-block;background-color:#007bff;color:#fff;text-decoration:none;padding:10px 20px;border-radius:4px;\">Verify Email</a>";
@@ -87,50 +142,9 @@ namespace Aqar.Infrastructure.Managers.Auth
                 {
                     Token = token.Token, // Include the email verification token in the response
                     LoginUrl = "https://your-domain.com/login" // URL of the login page
-                };
+                };       
 
-                //SendEmail(user,{ });
-               // return (token);
-            }
-            else if (model.UserType == UserType.Customer)
-            {
-                var user = new AppUser()
-                {
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
-                    UserName = model.Email,
-                    Email = model.Email,
-                    UserType = UserType.Customer,
-                    PhoneNumber = model.PhoneNumber,
-                  //  UserImage= model.UserImage,
-                    EmailConfirmed = false,
-
-                };
-                var token = await Generate(user);
-                var verificationUrl = $"https://your-domain.com/verify-email?userId={Uri.EscapeDataString(user.Id)}&token={Uri.EscapeDataString(token.Token)}";
-
-                emailDto.To = user.Email;
-                emailDto.Subject = "Thank you for the registration";
-                emailDto.Body = $"Click the button below to verify your email and activate your account:<br/><br/><a href=\"{verificationUrl}\" style=\"display:inline-block;background-color:#007bff;color:#fff;text-decoration:none;padding:10px 20px;border-radius:4px;\">Verify Email</a>";
-                _emailService.SendEmail(emailDto);
-                user.EmailConfirmed = true;
-
-                var result = await _userManager.CreateAsync(user, model.Password);
-                if (result.Succeeded)
-                {
-                    await _userManager.AddToRoleAsync(user, RolesName.Customer);
-                 }
-
-
-
-                return new AuthenticationResponse
-                {
-                    Token = token.Token, // Include the email verification token in the response
-                    LoginUrl = "https://your-domain.com/login" // URL of the login page
-                };
-            }
-
-            throw  new ServiceValidationException("Please check information Register");
+              throw  new ServiceValidationException("Please check information Register");
           
         }
 

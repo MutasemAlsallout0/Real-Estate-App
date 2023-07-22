@@ -12,6 +12,21 @@ namespace Aqar.Controllers
         {
             _authRepository = authRepository;
         }
+
+        [HttpPost]
+        [Route("api/account/signUpOfficeOwner")]
+        public async Task<IActionResult> SignUpOfficeOwner([FromForm] OfficeOwnerRegisterRequest model)
+        {
+            return Ok(await _authRepository.RegisterOfficeOwner(model));
+        }
+
+        [HttpPost]
+        [Route("api/account/signUpCustomer")]
+        public async Task<IActionResult> SignUpCustomer([FromForm]CustomerRegisterRequest model)
+        {
+            return Ok(await _authRepository.RegisterCustomer(model));
+        }
+
         [HttpPost]
         [Route("api/account/login")]
         public async Task<IActionResult> Login(LoginRequest request)
@@ -20,16 +35,8 @@ namespace Aqar.Controllers
 
         }
 
-
         [HttpPost]
-        [Route("api/account/signUp")]
-        public async Task<IActionResult> SignUp(RegisterRequest model)
-        {
-            return Ok(await _authRepository.RegisterUserAsync(model));
-        }
-
-
-        [HttpPost("resetPassword")]
+        [Route("api/account/resetPassword")]
         public async Task<IActionResult> ResetPassword(ResetPasswordRequest model)
         {
             if (!ModelState.IsValid)
@@ -47,7 +54,8 @@ namespace Aqar.Controllers
             return BadRequest(new { Message = "تعذر إرسال رابط إعادة تعيين كلمة المرور. يُرجى التحقق من صحة البريد الإلكتروني والتأكد من أنه مؤكد." });
         }
 
-        [HttpPost("confirmPasswordReset")]
+        [HttpPost]
+        [Route("api/account/confirmPasswordReset")]
         public async Task<IActionResult> ConfirmPasswordReset(ConfirmPasswordResetRequest model)
         {
             if (!ModelState.IsValid)

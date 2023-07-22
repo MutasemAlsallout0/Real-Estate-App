@@ -11,7 +11,7 @@ namespace Aqar.Infrastructure.AutoMapper
         public MappingProfile()
         {
             #region User
-            CreateMap<RegisterRequest, AppUser>();
+            CreateMap<CustomerRegisterRequest, AppUser>();
 
             #endregion
 
