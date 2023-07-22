@@ -1,4 +1,6 @@
 using Aqar.Core.Enums;
+using Microsoft.AspNetCore.Http;
+using System.Net.Mail;
 
 namespace Aqar.Core.DTOS.Estate
 {
@@ -11,6 +13,8 @@ namespace Aqar.Core.DTOS.Estate
         public double Area { get; set; }
         public string Description { get; set; }
         public bool SeenByAdmin { get; set; }
+        public List<IFormFile> Imagesfile { get; set; }
+
         public string UserId { get; set; }
         public int AddressId { get; set; }
     }

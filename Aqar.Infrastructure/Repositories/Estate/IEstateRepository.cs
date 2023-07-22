@@ -1,5 +1,6 @@
 ﻿using Aqar.Core.DTOS.Estate;
 using Aqar.Infrastructure.Extensions;
+using Aqar.Data.Model;
 
 namespace Aqar.Infrastructure.Repositories.Estate
 {
@@ -7,5 +8,6 @@ namespace Aqar.Infrastructure.Repositories.Estate
     {
         Task<PaginatedList<Data.Model.Estate>> GetPaginatedDataAsync(int pageNumber, int pageSize);
         Task<bool> Create(CreateEstateDTO input);
+        Task<List<Attachment>> AddAttachment(List<Attachment> attachments);
     }
 }

@@ -6,6 +6,7 @@ namespace Aqar.Infrastructure.HelperServices.ImageHelper
     public class ImageService : IImageService
     {
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly string _environment = "wwwroot";
 
         public ImageService(IWebHostEnvironment webHostEnvironment)
         {
@@ -50,6 +51,50 @@ namespace Aqar.Infrastructure.HelperServices.ImageHelper
                 await input.SaveAsync(folderSmall);
 
             }
+
+        }
+        public async Task<string> UploadFileAsync(IFormFile file, string folderName = "PdfFiles")
+        {
+            var uploadFolder = Path.Combine(_environment, folderName);
+            if (!Directory.Exists(uploadFolder))
+                Directory.CreateDirectory(uploadFolder);
+
+            string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+            string filePath = Path.Combine(uploadFolder, fileName);
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(fileStream);
+            }
+
+            return fileName;
+        }
+
+        public async Task<string> UploadImageAsync(IFormFile file, string folderName = "Images")
+        {
+            if (Path.GetExtension(file.FileName).ToLower() == ".pdf")
+                return await UploadFileAsync(file);
+
+            // wwwroot/Images
+            var uploadFolder = Path.Combine(_environment, folderName);
+            if (!Directory.Exists(uploadFolder))
+            {
+                Directory.CreateDirectory(uploadFolder);
+                // Images/Thumbs
+                Directory.CreateDirectory(Path.Combine(uploadFolder, "Thumbs"));
+                // Images/Thumbs/Med
+                Directory.CreateDirectory(Path.Combine(uploadFolder, "Thumbs", "Med"));
+                // Images/Thumbs/Small
+                Directory.CreateDirectory(Path.Combine(uploadFolder, "Thumbs", "Small"));
+            }
+            string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+            string filePath = Path.Combine(uploadFolder, fileName);
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(fileStream);
+            }
+
+            await ResizeImage(filePath, uploadFolder, fileName);
+            return fileName;
 
         }
 
