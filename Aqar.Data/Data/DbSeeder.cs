@@ -26,9 +26,20 @@ namespace Aqar.Data.Data
                 {
                     await userManager.SeedAdmin();
                 }
-                //await context.InitCountry();
-                //await ntcoext.InitCity();
-                //await context.InitStreet();
+                if(! await context.Countries.AnyAsync())
+                {
+                    await context.InitCountry();
+                }
+
+                if (!await context.Cities.AnyAsync())
+                {
+                    await context.InitCity();
+                }
+                if (!await context.Streets.AnyAsync())
+                {
+                    await context.InitStreet();
+                }
+ 
 
                 await context.SaveChangesAsync();
 
@@ -58,16 +69,16 @@ namespace Aqar.Data.Data
 
             var cities = new List<City>
             {
-                new City { Name = "غزة " , CountryId = 43},
-                new City { Name = "خان يونس" , CountryId = 43},
-                new City { Name = "رفح" , CountryId = 43},
-                new City { Name = "بيت لاهيا" , CountryId = 43},
-                new City { Name = "جباليا" , CountryId = 43},
-                new City { Name = "النصيرات" , CountryId = 43},
-                new City { Name = "البريج" , CountryId = 43},
-                new City { Name = "المغازي" , CountryId = 43},
-                new City { Name = "الزوايدة" , CountryId = 43},
-                new City { Name = "دير البلح" , CountryId = 43},
+                new City { Name = "غزة " , CountryId = 1},
+                new City { Name = "خان يونس" , CountryId = 1},
+                new City { Name = "رفح" , CountryId = 1},
+                new City { Name = "بيت لاهيا" , CountryId = 1},
+                new City { Name = "جباليا" , CountryId = 1},
+                new City { Name = "النصيرات" , CountryId = 1},
+                new City { Name = "البريج" , CountryId = 1},
+                new City { Name = "المغازي" , CountryId = 1},
+                new City { Name = "الزوايدة" , CountryId = 1},
+                new City { Name = "دير البلح" , CountryId = 1},
 
             };
             foreach (var city in cities)
@@ -80,65 +91,65 @@ namespace Aqar.Data.Data
 
             var streets = new List<Street>
             {
-                new Street { Name = "شارع عمر المختار" , CityId = 54},
-                new Street { Name = "شارع الثورة"      , CityId = 54},
-                new Street { Name = "شارع النفق"       , CityId = 54},
-                new Street { Name = "شارع صلاح الدين"   , CityId = 54},
-                new Street { Name = "شارع الوحدة"      , CityId = 54},
-                new Street { Name = "شارع الرشيد "     , CityId = 54},
-                new Street { Name = "شارع مصطفى حافظ"  , CityId = 54},
-                new Street { Name = "شارع حي الدرج"    , CityId = 54},
+                new Street { Name = "شارع عمر المختار" , CityId = 1},
+                new Street { Name = "شارع الثورة"      , CityId = 1},
+                new Street { Name = "شارع النفق"       , CityId = 1},
+                new Street { Name = "شارع صلاح الدين"   , CityId = 1},
+                new Street { Name = "شارع الوحدة"      , CityId = 1},
+                new Street { Name = "شارع الرشيد "     , CityId = 1},
+                new Street { Name = "شارع مصطفى حافظ"  , CityId = 1},
+                new Street { Name = "شارع حي الدرج"    , CityId = 1},
 
-               new Street { Name = "شارع الترنس"         , CityId = 55},
-               new Street { Name = "شارع القدرة"          , CityId = 55},
-               new Street { Name = "شارع المدرسة"         , CityId = 55},
-               new Street { Name = "شارع الهلال القديم"    , CityId = 55},
-               new Street { Name = "شارع القسام"          , CityId = 55},
-               new Street { Name = "شارع جمال عبد الناصر" , CityId = 55},
-               new Street { Name = "شارع البحر"           , CityId = 55},
-               new Street { Name = "شارع السيقلي"         , CityId = 55},
+               new Street { Name = "شارع الترنس"         , CityId = 2},
+               new Street { Name = "شارع القدرة"          , CityId = 2},
+               new Street { Name = "شارع المدرسة"         , CityId = 2},
+               new Street { Name = "شارع الهلال القديم"    , CityId = 2},
+               new Street { Name = "شارع القسام"          , CityId = 2},
+               new Street { Name = "شارع جمال عبد الناصر" , CityId = 2},
+               new Street { Name = "شارع البحر"           , CityId = 2},
+               new Street { Name = "شارع السيقلي"         , CityId = 2},
 
-               new Street { Name = "شارع ابو يوسف النجار" , CityId = 56},
-               new Street { Name = "شارع عمر بن الخطاب"   , CityId = 56},
-               new Street { Name = "شارع الزهراء"          , CityId = 56},
-               new Street { Name = "شارع البرازيل"         , CityId = 56},
-               new Street { Name = "شارع طه حسين"          , CityId = 56},
-               new Street { Name = "شارع المنتزة"          , CityId = 56},
+               new Street { Name = "شارع ابو يوسف النجار" , CityId = 3},
+               new Street { Name = "شارع عمر بن الخطاب"   , CityId = 3},
+               new Street { Name = "شارع الزهراء"          , CityId = 3},
+               new Street { Name = "شارع البرازيل"         , CityId = 3},
+               new Street { Name = "شارع طه حسين"          , CityId = 3},
+               new Street { Name = "شارع المنتزة"          , CityId = 3},
 
-               //new Street { Name = "شارع الشهداء" , CityId = 44},
-               //new Street { Name = "شارع صلاح خلف" , CityId = 44},
-               //new Street { Name = "شارع الخلفاء الراشدين" , CityId = 44},
-               //new Street { Name = "شارع السلام" , CityId = 44},
+               new Street { Name = "شارع الشهداء" ,          CityId = 10},
+               new Street { Name = "شارع صلاح خلف" ,         CityId = 10},
+               new Street { Name = "شارع الخلفاء الراشدين" , CityId = 10},
+               new Street { Name = "شارع السلام" ,            CityId = 10},
 
-               //new Street { Name = "شارع الحرية" , CityId = 39},
-               //new Street { Name = "شارع حيفا" , CityId = 39},
-               //new Street { Name = "شارع القدس" , CityId = 39},
-               //new Street { Name = "شارع النزهة" , CityId = 39},
-               //new Street { Name = "شارع المحول" , CityId = 39},
+               new Street { Name = "شارع الحرية" ,           CityId = 5},
+               new Street { Name = "شارع حيفا" ,             CityId = 5},
+               new Street { Name = "شارع القدس" ,           CityId = 5},
+               new Street { Name = "شارع النزهة" ,           CityId = 5},
+               new Street { Name = "شارع المحول" ,           CityId = 5},
 
-               //new Street { Name = "شارع المخيم" , CityId = 40},
-               //new Street { Name = "شارع عمر بنت عبد العزيز" , CityId = 40},
-               //new Street { Name = "شارع الامل" , CityId = 40},
-               //new Street { Name = "شارع فلسطين" , CityId = 40},
-               //new Street { Name = "شارع عمر بن الخطاب" , CityId = 40},
+               new Street { Name = "شارع المخيم" ,              CityId = 6},
+               new Street { Name = "شارع عمر بنت عبد العزيز" , CityId = 6},
+               new Street { Name = "شارع الامل" ,                CityId = 6},
+               new Street { Name = "شارع فلسطين" ,              CityId = 6},
+               new Street { Name = "شارع عمر بن الخطاب" ,      CityId = 6},
 
-               //new Street { Name = "شارع الاندلس" , CityId = 41},
-               //new Street { Name = "شارع الشهيد يحيى جابر" , CityId = 41},
-               //new Street { Name = "شارع البرج" , CityId = 41},
+               new Street { Name = "شارع الاندلس" ,             CityId = 7},
+               new Street { Name = "شارع الشهيد يحيى جابر" ,    CityId = 7},
+               new Street { Name = "شارع البرج" ,               CityId = 7},
 
-               //new Street { Name = "شارع خالد بن الوليد" , CityId = 43},
-               //new Street { Name = "شارع الخلفاء الراشدين" , CityId = 43},
-               //new Street { Name = "شارع النخيل" , CityId = 43},
-               //new Street { Name = "شارع العبسة" , CityId = 43},
+               new Street { Name = "شارع خالد بن الوليد" ,      CityId = 9},
+               new Street { Name = "شارع الخلفاء الراشدين" ,    CityId = 9},
+               new Street { Name = "شارع النخيل" ,              CityId = 9},
+               new Street { Name = "شارع العبسة" ,              CityId = 9},
 
-               //new Street { Name = "شارع خالد بن الوليد" , CityId = 42},
-               //new Street { Name = "شارع مغازي الشهداء" , CityId = 42},
+               new Street { Name = "شارع خالد بن الوليد" ,      CityId = 8},
+               new Street { Name = "شارع مغازي الشهداء" ,       CityId = 8},
 
-               //new Street { Name = "شارع المنشية" , CityId = 38},
-               //new Street { Name = "شارع الرملة" , CityId = 38},
-               //new Street { Name = "شارع الفلوجة" , CityId = 38},
-               //new Street { Name = "شارع الجمعية" , CityId = 38},
-               //new Street { Name = "الشارع العام بيت لاهيا" , CityId = 38},
+               new Street { Name = "شارع المنشية" ,             CityId = 4},
+               new Street { Name = "شارع الرملة" ,              CityId = 4},
+               new Street { Name = "شارع الفلوجة" ,             CityId = 4},
+               new Street { Name = "شارع الجمعية" ,             CityId = 4},
+               new Street { Name = "الشارع العام بيت لاهيا" ,   CityId = 4},
 
             };
             foreach (var street in streets)

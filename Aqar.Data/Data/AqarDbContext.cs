@@ -26,12 +26,12 @@ namespace Aqar.Data.DataLayer
             builder.Entity<Following>().HasKey(x => new { x.UserId, x.PublicPageId });
             builder.Entity<Preferences>().HasKey(x => new { x.UserId, x.EstateId });
 
-            #region Address
-            builder.Entity<Address>().HasDiscriminator<string>("Discriminator")
-                .HasValue<Country>("Country")
-                .HasValue<City>("City")
-                .HasValue<Street>("Street");
-            #endregion
+            //#region Address
+            //builder.Entity<Address>().HasDiscriminator<string>("Discriminator")
+            //    .HasValue<Country>("Country")
+            //    .HasValue<City>("City")
+            //    .HasValue<Street>("Street");
+            //#endregion
 
             
         }

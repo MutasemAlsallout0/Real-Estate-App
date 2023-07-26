@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Aqar.Data.Migrations
 {
     [DbContext(typeof(AqarDbContext))]
-    [Migration("20230722215116_appforinkeyestateattachment")]
-    partial class appforinkeyestateattachment
+    [Migration("20230726182945__init")]
+    partial class _init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,40 +24,6 @@ namespace Aqar.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("Aqar.Data.Model.Address", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreateAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsDelete")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdateAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Address");
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("Address");
-
-                    b.UseTphMappingStrategy();
-                });
 
             modelBuilder.Entity("Aqar.Data.Model.AppUser", b =>
                 {
@@ -184,7 +150,7 @@ namespace Aqar.Data.Migrations
                     b.ToTable("Attachments");
                 });
 
-            modelBuilder.Entity("Aqar.Data.Model.Estate", b =>
+            modelBuilder.Entity("Aqar.Data.Model.City", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -192,11 +158,62 @@ namespace Aqar.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("ActiveSate")
+                    b.Property<int>("CountryId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
 
-                    b.Property<int>("AddressId")
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdateAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CountryId");
+
+                    b.ToTable("Cities");
+                });
+
+            modelBuilder.Entity("Aqar.Data.Model.Country", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdateAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Countries");
+                });
+
+            modelBuilder.Entity("Aqar.Data.Model.Estate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<double>("Area")
                         .HasColumnType("float");
@@ -225,6 +242,9 @@ namespace Aqar.Data.Migrations
                     b.Property<bool>("SeenByAdmin")
                         .HasColumnType("bit");
 
+                    b.Property<int>("StreetId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("UpdateAt")
                         .HasColumnType("datetime2");
 
@@ -234,7 +254,7 @@ namespace Aqar.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AddressId");
+                    b.HasIndex("StreetId");
 
                     b.HasIndex("UserId");
 
@@ -307,6 +327,37 @@ namespace Aqar.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("PublicPages");
+                });
+
+            modelBuilder.Entity("Aqar.Data.Model.Street", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CityId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdateAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CityId");
+
+                    b.ToTable("Streets");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -442,37 +493,6 @@ namespace Aqar.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Aqar.Data.Model.City", b =>
-                {
-                    b.HasBaseType("Aqar.Data.Model.Address");
-
-                    b.Property<int>("CountryId")
-                        .HasColumnType("int");
-
-                    b.HasIndex("CountryId");
-
-                    b.HasDiscriminator().HasValue("City");
-                });
-
-            modelBuilder.Entity("Aqar.Data.Model.Country", b =>
-                {
-                    b.HasBaseType("Aqar.Data.Model.Address");
-
-                    b.HasDiscriminator().HasValue("Country");
-                });
-
-            modelBuilder.Entity("Aqar.Data.Model.Street", b =>
-                {
-                    b.HasBaseType("Aqar.Data.Model.Address");
-
-                    b.Property<int>("CityId")
-                        .HasColumnType("int");
-
-                    b.HasIndex("CityId");
-
-                    b.HasDiscriminator().HasValue("Street");
-                });
-
             modelBuilder.Entity("Aqar.Data.Model.Attachment", b =>
                 {
                     b.HasOne("Aqar.Data.Model.Estate", "Estate")
@@ -484,11 +504,22 @@ namespace Aqar.Data.Migrations
                     b.Navigation("Estate");
                 });
 
+            modelBuilder.Entity("Aqar.Data.Model.City", b =>
+                {
+                    b.HasOne("Aqar.Data.Model.Country", "Country")
+                        .WithMany("Cities")
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Country");
+                });
+
             modelBuilder.Entity("Aqar.Data.Model.Estate", b =>
                 {
-                    b.HasOne("Aqar.Data.Model.Address", "Address")
+                    b.HasOne("Aqar.Data.Model.Street", "Street")
                         .WithMany()
-                        .HasForeignKey("AddressId")
+                        .HasForeignKey("StreetId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -498,7 +529,7 @@ namespace Aqar.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Address");
+                    b.Navigation("Street");
 
                     b.Navigation("User");
                 });
@@ -552,6 +583,17 @@ namespace Aqar.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Aqar.Data.Model.Street", b =>
+                {
+                    b.HasOne("Aqar.Data.Model.City", "City")
+                        .WithMany("Streets")
+                        .HasForeignKey("CityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("City");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -603,39 +645,7 @@ namespace Aqar.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Aqar.Data.Model.City", b =>
-                {
-                    b.HasOne("Aqar.Data.Model.Country", "Country")
-                        .WithMany("Cities")
-                        .HasForeignKey("CountryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Country");
-                });
-
-            modelBuilder.Entity("Aqar.Data.Model.Street", b =>
-                {
-                    b.HasOne("Aqar.Data.Model.City", "City")
-                        .WithMany("Streets")
-                        .HasForeignKey("CityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("City");
-                });
-
             modelBuilder.Entity("Aqar.Data.Model.AppUser", b =>
-                {
-                    b.Navigation("Followings");
-                });
-
-            modelBuilder.Entity("Aqar.Data.Model.Estate", b =>
-                {
-                    b.Navigation("Images");
-                });
-
-            modelBuilder.Entity("Aqar.Data.Model.PublicPage", b =>
                 {
                     b.Navigation("Followings");
                 });
@@ -648,6 +658,16 @@ namespace Aqar.Data.Migrations
             modelBuilder.Entity("Aqar.Data.Model.Country", b =>
                 {
                     b.Navigation("Cities");
+                });
+
+            modelBuilder.Entity("Aqar.Data.Model.Estate", b =>
+                {
+                    b.Navigation("Images");
+                });
+
+            modelBuilder.Entity("Aqar.Data.Model.PublicPage", b =>
+                {
+                    b.Navigation("Followings");
                 });
 #pragma warning restore 612, 618
         }

@@ -36,8 +36,8 @@ namespace Aqar.Controllers
         }
 
         [HttpPost]
-        [Route("api/account/resetPassword")]
-        public async Task<IActionResult> ResetPassword(ResetPasswordRequest model)
+        [Route("api/account/forgetPassword")]
+        public async Task<IActionResult> ForgetPassword(ResetPasswordRequest model)
         {
             if (!ModelState.IsValid)
             {
@@ -71,6 +71,29 @@ namespace Aqar.Controllers
             }
 
             return BadRequest(new { Message = "فشل في إعادة تعيين كلمة المرور. يُرجى التحقق من صحة الرابط وإدخال كلمة مرور جديدة صحيحة." });
+        }
+
+        [HttpPost]
+        [Route("api/account/updateOfficeOwner")]
+        public async Task<IActionResult> UpdateOfficeOwner([FromForm] UpdateOfficeOwnerDto updateOfficeOwnerDto)
+        {
+            return Ok(await _authRepository.UpdateOfficeOwner(updateOfficeOwnerDto));
+
+        }
+        [HttpPost]
+        [Route("api/account/updateCustomer")]
+        public async Task<IActionResult> UpdateCustomer([FromForm] UpdateCustomerrDto updateCustomerrDto)
+        {
+            return Ok(await _authRepository.UpdateCustomer(updateCustomerrDto));
+
+        }
+
+        [HttpDelete]
+        [Route("api/account/deleteUser")]
+        public async Task<IActionResult> DeleteUser(string userId)
+        {
+            return Ok(await _authRepository.DeleteUser(userId));
+
         }
     }
 }

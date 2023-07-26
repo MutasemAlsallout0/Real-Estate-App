@@ -49,8 +49,7 @@ namespace Aqar.Infrastructure.Managers.Auth
 
             //var checkFromDbUser = _userManager.FindByEmailAsync(model.Email);
 
-            //if (checkFromDbUser is not null) throw new Exception("You are already exist !");
-            var emailDto = new EmailDto();
+            //if (checkFromDbUser != null) throw new ServiceValidationException("انت لديك حساب مسبقا");
 
 
             var user = new AppUser()
@@ -70,12 +69,14 @@ namespace Aqar.Infrastructure.Managers.Auth
             }
             var token = await Generate(user);
             var verificationUrl = $"https://your-domain.com/verify-email?userId={Uri.EscapeDataString(user.Id)}&token={Uri.EscapeDataString(token.Token)}";
-
+            
+            var emailDto = new EmailDto();
             emailDto.To = user.Email;
             emailDto.Subject = "Thank you for the registration";
             emailDto.Body = $"Click the button below to verify your email and activate your account:<br/><br/><a href=\"{verificationUrl}\" style=\"display:inline-block;background-color:#007bff;color:#fff;text-decoration:none;padding:10px 20px;border-radius:4px;\">Verify Email</a>";
             _emailService.SendEmail(emailDto);
             user.EmailConfirmed = true;
+            user.IsActive = true;
 
             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
@@ -90,7 +91,7 @@ namespace Aqar.Infrastructure.Managers.Auth
                 Token = token.Token, // Include the email verification token in the response
                 LoginUrl = "https://your-domain.com/login" // URL of the login page
             };
-            throw new ServiceValidationException("Please check information Register");
+            throw new ServiceValidationException("تاكد من بيانات التسجيل");
 
         }
 
@@ -99,8 +100,9 @@ namespace Aqar.Infrastructure.Managers.Auth
 
             //var checkFromDbUser = _userManager.FindByEmailAsync(model.Email);
 
-            //if (checkFromDbUser is not null) throw new Exception("You are already exist !");
-                var user = new AppUser()
+            //if (checkFromDbUser != null) throw new ServiceValidationException("انت لديك حساب مسبقا");
+
+            var user = new AppUser()
                 {
                     FirstName = model.FirstName,
                     LastName = model.LastName,
@@ -128,6 +130,7 @@ namespace Aqar.Infrastructure.Managers.Auth
                 emailDto.Body = $"Click the button below to verify your email and activate your account:<br/><br/><a href=\"{verificationUrl}\" style=\"display:inline-block;background-color:#007bff;color:#fff;text-decoration:none;padding:10px 20px;border-radius:4px;\">Verify Email</a>";
                 _emailService.SendEmail(emailDto);
                 user.EmailConfirmed = true; 
+                user.IsActive = true;
                 var result = await _userManager.CreateAsync(user, model.Password);
 
                 if (result.Succeeded)
@@ -144,8 +147,8 @@ namespace Aqar.Infrastructure.Managers.Auth
                     LoginUrl = "https://your-domain.com/login" // URL of the login page
                 };       
 
-              throw  new ServiceValidationException("Please check information Register");
-          
+              throw  new ServiceValidationException("تاكد من بيانات التسجيل");
+
         }
 
       
@@ -162,7 +165,7 @@ namespace Aqar.Infrastructure.Managers.Auth
 
             }
             else
-                 throw new ServiceValidationException("Login failed. Please check your Email or password.");
+                 throw new ServiceValidationException("يرجى التاكد من البريد الالكتروني او كلمة السر المدخلة");
         }
         
 
@@ -252,43 +255,97 @@ namespace Aqar.Infrastructure.Managers.Auth
             // يمكنك هنا التعامل مع أخطاء إعادة تعيين كلمة المرور
             return false;
         }
-    
+
+        public async Task<string> UpdateOfficeOwner(UpdateOfficeOwnerDto updateOfficeOwnerDto)
+        {
+            var userDb = await _userManager.FindByIdAsync(updateOfficeOwnerDto.UserId);
+            if (userDb == null) throw new ServiceValidationException("المستخدم غير موجود");
+
+            userDb.Email = updateOfficeOwnerDto.Email;
+            userDb.FirstName = updateOfficeOwnerDto.FirstName;
+            userDb.LastName = updateOfficeOwnerDto.LastName;
+            userDb.PhoneNumber = updateOfficeOwnerDto.PhoneNumber;
+            userDb.OfficeName = updateOfficeOwnerDto.OfficeName;
+
+            if (updateOfficeOwnerDto.UserImage != null)
+            {
+                userDb.UserImage = await _imageService.SaveImage(updateOfficeOwnerDto.UserImage, "Images");
+            }
+
+            var  result = await _userManager.UpdateAsync(userDb);
+            if (!result.Succeeded)
+                throw new ServiceValidationException("لم تتم عملية التعديل");
+
+            return "تم تعديل بياناتك بنجاح";
+        }
+
+        public async Task<string> UpdateCustomer(UpdateCustomerrDto updateCustomerrDto)
+        {
+            var userDb = await _userManager.FindByIdAsync(updateCustomerrDto.UserId);
+            if (userDb == null) throw new ServiceValidationException("المستخدم غير موجود");
+
+            userDb.Email = updateCustomerrDto.Email;
+            userDb.FirstName = updateCustomerrDto.FirstName;
+            userDb.LastName = updateCustomerrDto.LastName;
+            userDb.PhoneNumber = updateCustomerrDto.PhoneNumber;
+ 
+            if (updateCustomerrDto.UserImage != null)
+            {
+                userDb.UserImage = await _imageService.SaveImage(updateCustomerrDto.UserImage, "Images");
+            }
+
+            var result = await _userManager.UpdateAsync(userDb);
+            if (!result.Succeeded)
+                throw new ServiceValidationException("لم تتم عملية التعديل");
+
+            return "تم تعديل بياناتك بنجاح";
+        }
 
 
+        //private void SendEmail(AppUser user, EmailCategories emailCategories)
+        //    {
+        //        var emailDto = new EmailDto();
+        //        emailDto.To = user.Email;
 
-    //private void SendEmail(AppUser user, EmailCategories emailCategories)
-    //    {
-    //        var emailDto = new EmailDto();
-    //        emailDto.To = user.Email;
+        //        switch (emailCategories)
+        //        {
+        //            case EmailCategories.Registration:
+        //                {
+        //                    emailDto.Subject = "Thank you for the registration";
+        //                    emailDto.Body = $"This is your verify token : {Generate(user)}";
+        //                    break;
+        //                }
+        //            case EmailCategories.ForgetPassword:
+        //                {
+        //                    emailDto.Subject = "You can reset your password now";
+        //                    emailDto.Body = $"This is your reset token : {Generate(user)}. \n Please reset your password before {Generate(user)}";
+        //                    break;
+        //                }
+        //            case EmailCategories.VerifyEmail:
+        //                {
+        //                    emailDto.Subject = "Thanks for confirming your email";
+        //                    emailDto.Body = $"Your account has been verified at : {user.EmailConfirmed}";
+        //                    break;
+        //                }
+        //            default:
+        //                break;
+        //        }
 
-    //        switch (emailCategories)
-    //        {
-    //            case EmailCategories.Registration:
-    //                {
-    //                    emailDto.Subject = "Thank you for the registration";
-    //                    emailDto.Body = $"This is your verify token : {Generate(user)}";
-    //                    break;
-    //                }
-    //            case EmailCategories.ForgetPassword:
-    //                {
-    //                    emailDto.Subject = "You can reset your password now";
-    //                    emailDto.Body = $"This is your reset token : {Generate(user)}. \n Please reset your password before {Generate(user)}";
-    //                    break;
-    //                }
-    //            case EmailCategories.VerifyEmail:
-    //                {
-    //                    emailDto.Subject = "Thanks for confirming your email";
-    //                    emailDto.Body = $"Your account has been verified at : {user.EmailConfirmed}";
-    //                    break;
-    //                }
-    //            default:
-    //                break;
-    //        }
-
-    //        _emailService.SendEmail(emailDto);
-    //    }
+        //        _emailService.SendEmail(emailDto);
+        //    }
 
 
-        
+        public async Task<bool> DeleteUser(string userId)
+        {
+            var dbUseer = await _userManager.FindByIdAsync(userId);
+
+            if (dbUseer == null) throw new ServiceValidationException("المستخد غير موجود");
+
+            dbUseer.IsActive = false;
+            await _userManager.UpdateAsync(dbUseer);
+            return true;
+        }
+
+
     }
 }

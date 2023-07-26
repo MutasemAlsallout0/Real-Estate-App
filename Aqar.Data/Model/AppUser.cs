@@ -24,6 +24,10 @@ namespace Aqar.Data.Model
 
         public List<Following> Followings { get; set; }
 
+        public string GetFullName()
+        {
+            return $"{FirstName} {LastName}";
+        }
 
     }
 }

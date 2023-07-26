@@ -1,6 +1,7 @@
-using Aqar.Core.DTOS.Estate;
+﻿using Aqar.Core.DTOS.Estate;
 using Aqar.Data.DataLayer;
 using Aqar.Data.Model;
+using Aqar.Infrastructure.Exceptions;
 using Aqar.Infrastructure.Extensions;
 using Aqar.Infrastructure.HelperServices.ImageHelper;
 using AutoMapper;
@@ -8,7 +9,7 @@ using DocumentFormat.OpenXml.Office2010.ExcelAc;
 using DocumentFormat.OpenXml.Vml.Office;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
- 
+using Org.BouncyCastle.Tls;
 
 namespace Aqar.Infrastructure.Repositories.Estate
 {
@@ -37,6 +38,46 @@ namespace Aqar.Infrastructure.Repositories.Estate
             var itemes = await PaginatedList<Aqar.Data.Model.Estate>.CreateAsync(query, pageNumber, pageSize);
             return itemes;
         }
+
+        public async Task<GetEstateDto> GetEstate(int Id)
+        {
+            var estate = await _context.Estates
+                .Include(z => z.User)
+                .Include(x => x.Street).ThenInclude(x => x.City).ThenInclude(x => x.Country)
+                .FirstOrDefaultAsync(x => x.Id == Id);
+
+            if (estate != null)
+            {
+                var imagesUrls = await _context.Attachments
+                    .Where(ei => ei.EstateId == estate.Id)
+                    .Select(ei => ei.Image)
+                    .ToListAsync();
+
+                var estateDTO = new GetEstateDto
+                {
+                    Id = estate.Id,
+                    Images = imagesUrls,
+                    Description = estate.Description,
+                    Price = estate.Price,
+                    EstateType = estate.EstateType.ToString(),
+                    ContractType = estate.ContractType.ToString(),
+                    street = estate.Street.Name,
+                    city = estate.Street.City.Name,
+                    country = estate.Street.City.Country.Name,
+                    OwnerEstate = estate.User.GetFullName(),
+                    Area = estate.Area
+
+                };
+
+
+                return estateDTO;
+            }
+
+            
+            return null;
+        }
+
+
         public async Task<List<Attachment>> AddAttachment(List<Attachment> attachments)
         {
             await _context.Attachments.AddRangeAsync(attachments);
@@ -45,65 +86,64 @@ namespace Aqar.Infrastructure.Repositories.Estate
         }
 
 
-        public async Task<bool> Create( CreateEstateDTO input)
+        public async Task<Data.Model.Estate> Create( CreateEstateDTO input)
         {
-            if (input is null) return false;
-
 
             var estate = _mapper.Map<Data.Model.Estate>(input);
-            ////   estate.EstateType=input.EstateType.ToString();
-            ///
-            var Result = _context.Estates.Add(estate);
-            if (input.Imagesfile != null)
-            {
-                List<Attachment> attachments = new List<Attachment>();
+           
+            var Result = await _context.Estates.AddAsync(estate);
+ 
+                await _context.SaveChangesAsync();
 
-                foreach (var item in input.Imagesfile)
-                {
-                    var name = await _imageService.UploadImageAsync(item);
-                    attachments.Add(new Attachment
-                    {
-                        // NewsContentId = entity.Id,
-                        EstateId=estate.Id,
-                        Image = name
-                    });
-                }
-                await AddAttachment(attachments);
-
-
-                // await AddAttachment(attachments);
-            }
-            //foreach (var item in input.Imagesfile)
-            //{
-
-
-            //    var name = await _imageService.UploadImageAsync(item);
-            //    estate.Images = new List<Attachment>();
-            //    estate.Images.Add(new Attachment
-            //    {
-            //        //   NewsContentId = newsContent.Id,
-            //        Image = name
-            //    });
-            //    await _context.SaveChangesAsync();
-            //}
-
-
-            //estate.Images = new List<Attachment>
-            //{
-            //    new Attachment{Image="test1"},
-            //    new Attachment{Image="test2"}
-
-            //};
-
-
-
-
-            _context.SaveChanges();
-                return true;
-            
-
+                return estate;
            
         }
+
+        public async Task<Data.Model.Estate> UpdateEstate(UpdateEstateDTO input)
+        {
+            var dbestate = await _context.Estates.FirstOrDefaultAsync(x => x.Id == input.Id);
+
+            if (dbestate == null) throw new ServiceValidationException("لا يوجد عقار!");
+
+            dbestate.EstateType = input.EstateType;
+            dbestate.ContractType = input.ContractType;
+            dbestate.Price = input.Price;
+            dbestate.Description = input.Description;
+            dbestate.Area = input.Area;
+            dbestate.StreetId = input.StreetId;
+
+            var Result =  _context.Estates.Update(dbestate);
+
+            await _context.SaveChangesAsync();
+
+            return dbestate;
+
+        }
+
+        public async Task<string> DeleteEstate(int id)
+        {
+            var dbestate = await _context.Estates.Include(x => x.Images).FirstOrDefaultAsync(x => x.Id == id);
+
+            if (dbestate == null) throw new ServiceValidationException("لا يوجد عقار!");
+
+            // حذف المرفقات المرتبطة بالعقار
+            foreach (var estateImage in dbestate.Images.ToList())
+            {
+                var dbestateAttachment = await _context.Attachments.FirstOrDefaultAsync(x => x.Id == estateImage.Id);
+                if (dbestateAttachment != null)
+                {
+                    _context.Attachments.Remove(dbestateAttachment);
+                }
+            }
+
+            // حذف العقار نفسه
+            _context.Estates.Remove(dbestate);
+
+            await _context.SaveChangesAsync();
+
+            return "تم حذف العقار والمرفقات المرتبطة بنجاح!";
+        }
+
 
     }
 }
