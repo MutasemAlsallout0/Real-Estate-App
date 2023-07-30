@@ -30,12 +30,12 @@ namespace Aqar.Infrastructure.Repositories.Estate
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<PaginatedList<Aqar.Data.Model.Estate>> GetPaginatedDataAsync(int pageNumber, int pageSize)
+        public async Task<PaginatedList<GetEstateDto>> GetPaginatedDataAsync(int pageNumber, int pageSize)
         {
             var query = _context.Estates.AsQueryable();
             var totalCount = await query.CountAsync();
-            var pageData = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
-            var itemes = await PaginatedList<Aqar.Data.Model.Estate>.CreateAsync(query, pageNumber, pageSize);
+            var pageData =   query.Skip((pageNumber - 1) * pageSize).Take(pageSize).AsQueryable();
+            var itemes = await PaginatedList<GetEstateDto>.CreateAsync((IQueryable<GetEstateDto>)query, pageNumber, pageSize);
             return itemes;
         }
 
