@@ -27,13 +27,39 @@ namespace Aqar.Infrastructure.Repositories.Estate
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<PaginatedList<Aqar.Data.Model.Estate>> GetPaginatedDataAsync(int pageNumber, int pageSize)
+        //public async Task<PaginatedList<Aqar.Data.Model.Estate>> GetPaginatedDataAsync(int pageNumber, int pageSize)
+        //{
+        //    var query = _context.Estates.AsQueryable().Where(x => x.SeenByAdmin == true);
+        //    var totalCount = await query.CountAsync();
+        //    var pageData = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+        //    var itemes = await PaginatedList<Aqar.Data.Model.Estate>.CreateAsync(query, pageNumber, pageSize);
+        //    return itemes;
+        //}
+        public async Task<PaginatedList<GetEstateDto>> GetPaginatedDataAsync(int pageNumber, int pageSize)
         {
             var query = _context.Estates.AsQueryable().Where(x => x.SeenByAdmin == true);
             var totalCount = await query.CountAsync();
-            var pageData = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
-            var itemes = await PaginatedList<Aqar.Data.Model.Estate>.CreateAsync(query, pageNumber, pageSize);
-            return itemes;
+            var pageData = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize)
+                                     .Select(x => new GetEstateDto
+                                     {
+                                         Id = x.Id,
+                                         OwnerEstate = x.User.GetFullName(),
+                                         EstateType = x.EstateType.ToString(),
+                                         ContractType = x.ContractType.ToString(),
+                                         Price = x.Price,
+                                         Area = x.Area,
+                                         Description = x.Description,
+                                         SeenByAdmin = x.SeenByAdmin,
+                                         street = x.Street.Name,
+                                         city = x.Street.City.Name,
+                                         country = x.Street.City.Country.Name,
+                                       //  Images = x.Images.ToList() // Assuming Images is a collection of strings
+                                       //ضيف الصورة الرئيسية 
+                                     })
+                                     .ToListAsync();
+
+            var paginatedList = new PaginatedList<GetEstateDto>(pageData, totalCount, pageNumber, pageSize);
+            return paginatedList;
         }
 
         public async Task<GetEstateDto> GetEstate(int Id)

@@ -6,7 +6,7 @@ namespace Aqar.Infrastructure.Repositories.Estate
 {
     public interface IEstateRepository
     {
-        Task<PaginatedList<Data.Model.Estate>> GetPaginatedDataAsync(int pageNumber, int pageSize);
+        Task<PaginatedList<GetEstateDto>> GetPaginatedDataAsync(int pageNumber, int pageSize);
         //Task<bool> Create(CreateEstateDTO input);
         Task<Data.Model.Estate> Create(CreateEstateDTO input);
         Task<List<Attachment>> AddAttachment(List<Attachment> attachments);
