@@ -5,11 +5,8 @@ using Aqar.Infrastructure.Exceptions;
 using Aqar.Infrastructure.Extensions;
 using Aqar.Infrastructure.HelperServices.ImageHelper;
 using AutoMapper;
-using DocumentFormat.OpenXml.Office2010.ExcelAc;
-using DocumentFormat.OpenXml.Vml.Office;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Tls;
 
 namespace Aqar.Infrastructure.Repositories.Estate
 {
@@ -32,7 +29,7 @@ namespace Aqar.Infrastructure.Repositories.Estate
 
         public async Task<PaginatedList<Aqar.Data.Model.Estate>> GetPaginatedDataAsync(int pageNumber, int pageSize)
         {
-            var query = _context.Estates.AsQueryable();
+            var query = _context.Estates.AsQueryable().Where(x => x.SeenByAdmin == true);
             var totalCount = await query.CountAsync();
             var pageData = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
             var itemes = await PaginatedList<Aqar.Data.Model.Estate>.CreateAsync(query, pageNumber, pageSize);
@@ -44,10 +41,11 @@ namespace Aqar.Infrastructure.Repositories.Estate
             var estate = await _context.Estates
                 .Include(z => z.User)
                 .Include(x => x.Street).ThenInclude(x => x.City).ThenInclude(x => x.Country)
-                .FirstOrDefaultAsync(x => x.Id == Id);
+                .FirstOrDefaultAsync(x => x.Id == Id && x.SeenByAdmin == true);
 
-            if (estate != null)
-            {
+            if (estate == null) 
+                throw new ServiceValidationException("لا يوجد عقار!");
+            
                 var imagesUrls = await _context.Attachments
                     .Where(ei => ei.EstateId == estate.Id)
                     .Select(ei => ei.Image)
@@ -69,12 +67,7 @@ namespace Aqar.Infrastructure.Repositories.Estate
 
                 };
 
-
-                return estateDTO;
-            }
-
-            
-            return null;
+                return estateDTO;                    
         }
 
 
@@ -90,12 +83,13 @@ namespace Aqar.Infrastructure.Repositories.Estate
         {
 
             var estate = _mapper.Map<Data.Model.Estate>(input);
-           
-            var Result = await _context.Estates.AddAsync(estate);
- 
-                await _context.SaveChangesAsync();
 
-                return estate;
+            estate.SeenByAdmin = false;
+
+            await _context.Estates.AddAsync(estate);
+            await _context.SaveChangesAsync();
+
+            return estate;
            
         }
 
@@ -126,8 +120,7 @@ namespace Aqar.Infrastructure.Repositories.Estate
 
             if (dbestate == null) throw new ServiceValidationException("لا يوجد عقار!");
 
-            // حذف المرفقات المرتبطة بالعقار
-            foreach (var estateImage in dbestate.Images.ToList())
+             foreach (var estateImage in dbestate.Images.ToList())
             {
                 var dbestateAttachment = await _context.Attachments.FirstOrDefaultAsync(x => x.Id == estateImage.Id);
                 if (dbestateAttachment != null)
@@ -136,8 +129,7 @@ namespace Aqar.Infrastructure.Repositories.Estate
                 }
             }
 
-            // حذف العقار نفسه
-            _context.Estates.Remove(dbestate);
+             _context.Estates.Remove(dbestate);
 
             await _context.SaveChangesAsync();
 

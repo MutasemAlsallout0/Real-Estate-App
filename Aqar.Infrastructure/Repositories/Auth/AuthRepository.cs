@@ -78,6 +78,21 @@ namespace Aqar.Infrastructure.Managers.Auth
             user.EmailConfirmed = true;
             user.IsActive = true;
 
+
+            // Send SMS verification
+            //var verificationCode = GenerateRandomVerificationCode(); // Implement this method to generate a random verification code.
+            //var twilioPhoneNumber = "+972598432320"; // Replace with your Twilio phone number
+            //var twilioAccountSid = "ACd5a9ec23fdf8554132a15965cfdcbba4"; // Replace with your Twilio Account SID
+            //var twilioAuthToken = "ed9bb22e0d0542fdd350280a365f11c6"; // Replace with your Twilio Auth Token
+
+            //TwilioClient.Init(twilioAccountSid, twilioAuthToken);
+
+            //var message = MessageResource.Create(
+            //    body: $"Your verification code is: {verificationCode}",
+            //    from: new Twilio.Types.PhoneNumber(twilioPhoneNumber),
+            //    to: new Twilio.Types.PhoneNumber(model.PhoneNumber)
+            //);
+
             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
@@ -94,7 +109,11 @@ namespace Aqar.Infrastructure.Managers.Auth
             throw new ServiceValidationException("تاكد من بيانات التسجيل");
 
         }
-
+        private string GenerateRandomVerificationCode()
+        {
+            Random random = new Random();
+            return random.Next(100000, 999999).ToString();
+        }
         public async Task<AuthenticationResponse> RegisterOfficeOwner(OfficeOwnerRegisterRequest model)
         {
 
@@ -193,7 +212,7 @@ namespace Aqar.Infrastructure.Managers.Auth
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
 
-            var Expiration = DateTime.Now.AddMinutes(1);
+            var Expiration = DateTime.Now.AddDays(1);
 
 
             // token 

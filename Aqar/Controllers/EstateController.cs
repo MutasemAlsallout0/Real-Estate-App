@@ -52,11 +52,8 @@ namespace Aqar.Controllers
                     });
                 }
                 await _estateRepository.AddAttachment(attachments);
-
-
-                // await AddAttachment(attachments);
             }
-            return Ok("تم اضافة عقار جديد");
+            return Ok("تم اضافة العقار للمراجعة");
         }
 
 
@@ -80,9 +77,6 @@ namespace Aqar.Controllers
                     });
                 }
                 await _estateRepository.AddAttachment(attachments);
-
-
-                // await AddAttachment(attachments);
             }
             return Ok("تم تعديل العقار ");
         }
