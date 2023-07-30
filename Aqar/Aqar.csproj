@@ -29,9 +29,4 @@
     <ProjectReference Include="..\Aqar.Infrastructure\Aqar.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="wwwroot\Images\Thumbs\Med\" />
-    <Folder Include="wwwroot\Images\Thumbs\Small\" />
-  </ItemGroup>
-
 </Project>
