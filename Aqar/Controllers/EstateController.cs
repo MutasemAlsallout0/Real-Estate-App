@@ -1,15 +1,12 @@
 ﻿using Aqar.Core.DTOS.Estate;
-using Aqar.Core.Helpers;
 using Aqar.Data.Model;
 using Aqar.Infrastructure.HelperServices.ImageHelper;
 using Aqar.Infrastructure.Repositories.Estate;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Aqar.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
+     [ApiController]
     public class EstateController : ControllerBase
     {
         private readonly IEstateRepository _estateRepository;
@@ -21,20 +18,23 @@ namespace Aqar.Controllers
         
         }
 
-        [HttpGet("GetAll")]
-        public async Task<IActionResult>GetAllEstate([FromQuery] int pageNumber, int pageSize)
+        [HttpGet]
+        [Route("api/estate/getAllEstate")]
+        public async Task<IActionResult> GetAllEstate([FromQuery] int pageNumber, int pageSize)
         {
             return Ok( await _estateRepository.GetPaginatedDataAsync(pageNumber, pageSize));
         }
 
-        [HttpGet("Id")]
+        [HttpGet]
+        [Route("api/estate/getAllEstate/{Id}")]
         public async Task<IActionResult> GetEstate(int Id)
         {
             return Ok(await _estateRepository.GetEstate(Id));
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromForm]CreateEstateDTO input)
+        [Route("api/estate/addEstate")]
+        public async Task<IActionResult> AddEstate([FromForm]CreateEstateDTO input)
         {
            var result= await _estateRepository.Create(input);
 
@@ -59,6 +59,7 @@ namespace Aqar.Controllers
 
 
         [HttpPut]
+        [Route("api/estate/updateEstate")]
         public async Task<IActionResult> UpdateEstate([FromForm] UpdateEstateDTO input)
         {
             var result = await _estateRepository.UpdateEstate(input);
@@ -82,6 +83,7 @@ namespace Aqar.Controllers
         }
 
         [HttpDelete]
+        [Route("api/estate/deleteEstate")]
         public async Task<IActionResult> DeleteEstate(int id)
         {
             return Ok(await _estateRepository.DeleteEstate(id));
