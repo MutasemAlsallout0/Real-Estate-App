@@ -6,6 +6,7 @@ using Aqar.Data.Model;
 using Aqar.Infrastructure.Exceptions;
 using Aqar.Infrastructure.HelperServices.EmailHelper;
 using Aqar.Infrastructure.HelperServices.ImageHelper;
+using Aqar.Infrastructure.Repositories.PublicPage;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -23,6 +24,7 @@ namespace Aqar.Infrastructure.Managers.Auth
         private readonly IMapper _mapper;
         private readonly AqarDbContext _context;
         private readonly IImageService _imageService;
+        private readonly IPublicPageRepository _publicPageRepository;
         private readonly IEmailService _emailService;
     
       //  public enum EmailCategories { Registration, ForgetPassword, VerifyEmail } //Sending email in the different situations
@@ -32,7 +34,7 @@ namespace Aqar.Infrastructure.Managers.Auth
                             IMapper mapper, 
                             AqarDbContext context,
                             IEmailService emailService,
-                            IImageService imageService)
+                            IImageService imageService, IPublicPageRepository publicPageRepository)
         {
             _configuration = configuration;
             _userManager = userManager;
@@ -40,7 +42,7 @@ namespace Aqar.Infrastructure.Managers.Auth
             _context = context;
             _emailService = emailService;
             _imageService = imageService;
-             
+           _publicPageRepository = publicPageRepository;
         }
 
 
@@ -157,10 +159,10 @@ namespace Aqar.Infrastructure.Managers.Auth
                     await _userManager.AddToRoleAsync(user, RolesName.OfficeOwner);
 
                  }
+            var publicPage = await _publicPageRepository.CreatePublicPageForOfficeOwner(user.Id, model.OfficeName);
 
-                
 
-                return new AuthenticationResponse
+            return new AuthenticationResponse
                 {
                     Token = token.Token, // Include the email verification token in the response
                     LoginUrl = "https://your-domain.com/login" // URL of the login page
