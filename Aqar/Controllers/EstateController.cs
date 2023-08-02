@@ -1,12 +1,16 @@
 ﻿using Aqar.Core.DTOS.Estate;
+using Aqar.Core.Enums;
+using Aqar.Data.DataLayer;
 using Aqar.Data.Model;
 using Aqar.Infrastructure.HelperServices.ImageHelper;
 using Aqar.Infrastructure.Repositories.Estate;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Aqar.Controllers
 {
-     [ApiController]
+    [ApiController]
+    [Authorize]
     public class EstateController : ControllerBase
     {
         private readonly IEstateRepository _estateRepository;
@@ -20,9 +24,9 @@ namespace Aqar.Controllers
 
         [HttpGet]
         [Route("api/estate/getAllEstate")]
-        public async Task<IActionResult> GetAllEstate([FromQuery] int pageNumber, int pageSize)
+        public async Task<IActionResult> GetAllEstate([FromQuery] int pageNumber, int pageSize, EstateType? estateType)
         {
-            return Ok( await _estateRepository.GetPaginatedDataAsync(pageNumber, pageSize));
+            return Ok( await _estateRepository.GetPaginatedDataAsync(pageNumber, pageSize,estateType));
         }
 
         [HttpGet]

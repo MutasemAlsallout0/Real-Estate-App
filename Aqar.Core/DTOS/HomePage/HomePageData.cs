@@ -6,9 +6,6 @@ namespace Aqar.Core.DTOS.HomePage
     {
         public EstateData GetEstateData { get; set; }
 
-
-
-
     }
 
    public class EstateData

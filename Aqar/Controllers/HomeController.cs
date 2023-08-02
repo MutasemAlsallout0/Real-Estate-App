@@ -1,13 +1,11 @@
-﻿using Aqar.Core.Enums;
-using Aqar.Infrastructure.Extensions;
+﻿using Aqar.Core.DTOS.HomePage;
 using Aqar.Infrastructure.Repositories.Hompage;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NuGet.Protocol.Core.Types;
+
 
 namespace Aqar.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
     public class HomeController : ControllerBase
     {
@@ -20,30 +18,21 @@ namespace Aqar.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        [Route("api/mainHome/allData")]
+        public async Task<IActionResult> AllData()
         {
-            //var allAboutUs = ;
             return Ok(await _homePageRepository.AllData());
         }
-        [HttpGet("pagenation")]
-        public async Task<ActionResult<PaginationContent>> GetContents(
-     string term,
-     EstateType? estateType,
-     ContractType? contractType,
-     int currentPage
- )
+
+        [HttpPost]
+        [Route("api/mainHome/getContentsSearch")]
+        public async Task<IActionResult> GetContents( SearchDto searchDto) 
         {
-            try
-            {
-                // استدعاء الدالة GetContentsAsync وتمرير المعايير للبحث
-                var contents = await _homePageRepository.GetContentsAsync(term, estateType, contractType, currentPage);
-                return Ok(contents); // الاستجابة تحتوي على المحتوى المرتجع من الدالة GetContentsAsync
-            }
-            catch (Exception ex)
-            {
-                // يمكنك التعامل مع الأخطاء هنا وإرجاع استجابة خاصة بالخطأ إذا لزم الأمر.
-                return StatusCode(500, "حدث خطأ أثناء معالجة الطلب.");
-            }
+            
+               
+                var contents = await _homePageRepository.GetContentsAsync(searchDto);
+                return Ok(contents); 
+            
         }
     }
 }

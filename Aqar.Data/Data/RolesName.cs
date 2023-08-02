@@ -12,6 +12,7 @@ namespace Aqar.Data.DataLayer
             public const string OfficeOwner = "OfficeOwner";
 
 
-        }
-    
+
+    }
+
 }

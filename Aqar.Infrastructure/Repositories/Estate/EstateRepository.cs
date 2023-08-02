@@ -1,10 +1,12 @@
 ﻿using Aqar.Core.DTOS.Estate;
+using Aqar.Core.Enums;
 using Aqar.Data.DataLayer;
 using Aqar.Data.Model;
 using Aqar.Infrastructure.Exceptions;
 using Aqar.Infrastructure.Extensions;
 using Aqar.Infrastructure.HelperServices.ImageHelper;
 using AutoMapper;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,18 +28,15 @@ namespace Aqar.Infrastructure.Repositories.Estate
             _imageService = imageService;
             _httpContextAccessor = httpContextAccessor;
         }
-
-        //public async Task<PaginatedList<Aqar.Data.Model.Estate>> GetPaginatedDataAsync(int pageNumber, int pageSize)
-        //{
-        //    var query = _context.Estates.AsQueryable().Where(x => x.SeenByAdmin == true);
-        //    var totalCount = await query.CountAsync();
-        //    var pageData = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
-        //    var itemes = await PaginatedList<Aqar.Data.Model.Estate>.CreateAsync(query, pageNumber, pageSize);
-        //    return itemes;
-        //}
-        public async Task<PaginatedList<GetEstateDto>> GetPaginatedDataAsync(int pageNumber, int pageSize)
+        public async Task<PaginatedList<GetEstateDto>> GetPaginatedDataAsync(int pageNumber, int pageSize, EstateType? estateType)
         {
             var query = _context.Estates.AsQueryable().Where(x => x.SeenByAdmin == true);
+
+            if (estateType.HasValue)
+            {
+                query = query.Where(x => x.EstateType == estateType.Value);
+            }
+
             var totalCount = await query.CountAsync();
             var pageData = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize)
                                      .Select(x => new GetEstateDto
@@ -49,18 +48,17 @@ namespace Aqar.Infrastructure.Repositories.Estate
                                          Price = x.Price,
                                          Area = x.Area,
                                          Description = x.Description,
-                                         SeenByAdmin = x.SeenByAdmin,
                                          street = x.Street.Name,
                                          city = x.Street.City.Name,
                                          country = x.Street.City.Country.Name,
-                                       //  Images = x.Images.ToList() // Assuming Images is a collection of strings
-                                       //ضيف الصورة الرئيسية 
+                                         MainImage = x.MainImage,
                                      })
                                      .ToListAsync();
 
             var paginatedList = new PaginatedList<GetEstateDto>(pageData, totalCount, pageNumber, pageSize);
             return paginatedList;
         }
+
 
         public async Task<GetEstateDto> GetEstate(int Id)
         {
@@ -89,7 +87,8 @@ namespace Aqar.Infrastructure.Repositories.Estate
                     city = estate.Street.City.Name,
                     country = estate.Street.City.Country.Name,
                     OwnerEstate = estate.User.GetFullName(),
-                    Area = estate.Area
+                    Area = estate.Area,
+                    MainImage = estate.MainImage,
 
                 };
 
@@ -110,6 +109,10 @@ namespace Aqar.Infrastructure.Repositories.Estate
 
             var estate = _mapper.Map<Data.Model.Estate>(input);
 
+            if (input.MainImage != null)
+            {
+                estate.MainImage = await _imageService.SaveImage(input.MainImage, "Images");
+            }
             estate.SeenByAdmin = false;
 
             await _context.Estates.AddAsync(estate);

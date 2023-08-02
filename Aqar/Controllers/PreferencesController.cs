@@ -1,9 +1,11 @@
 ﻿using Aqar.Infrastructure.Repositories.Preferences;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Aqar.Controllers
 {
     [ApiController]
+    [Authorize]
     public class PreferencesController : ControllerBase
     {
         private readonly IPreferencesRepository _preferencesRepository;

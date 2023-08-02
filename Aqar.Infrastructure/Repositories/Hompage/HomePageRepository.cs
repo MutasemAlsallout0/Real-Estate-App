@@ -82,54 +82,58 @@ namespace Aqar.Infrastructure.Repositories.Hompage
             };
         }
 
-        public async Task<PaginationContent> GetContentsAsync(string term, EstateType? estateType, ContractType? contractType,   int currentPage)
+        public async Task<PaginatedList<GetEstateDto>> GetContentsAsync(SearchDto searchDto)
         {
-            term = string.IsNullOrEmpty(term) ? "" : term.ToLower();
-            var contentData = new PaginationContent
+
+
+            var content = _context.Estates
+                                        .Include(x => x.Street)
+                                            .ThenInclude(x => x.City)
+                                                .ThenInclude(x => x.Country)
+                                                .OrderByDescending(a => a.CreateAt)
+                                                .Where(est => est.SeenByAdmin == true).AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(searchDto.street))
             {
-             };
+                content = content.Where(x => x.Street.Name.ToLower().Contains(searchDto.street.ToLower()));
+            }
+            if (!string.IsNullOrWhiteSpace(searchDto.city))
+            {
+                content = content.Where(x => x.Street.City.Name.ToLower().Contains(searchDto.city.ToLower()));
+            }
+            if (!string.IsNullOrWhiteSpace(searchDto.country))
+            {
+                content = content.Where(x => x.Street.City.Country.Name.ToLower().Contains(searchDto.country.ToLower()));
+            }
+            if (searchDto.contractType != 0)
+            {
+                content = content.Where(x => x.ContractType == searchDto.contractType);
+            }
+            if (searchDto.estateType != 0)
+            {
+                content = content.Where(x => x.EstateType == searchDto.estateType);
+            }
 
-            var content = from est in _context.Estates.Include(x=>x.User).Include(x=>x.Images).Include(x=>x.Street).ThenInclude(x=>x.City).ThenInclude(x=>x.Country)
-                          where (term == "" || est.Street.City.Name.Contains(term.ToLower())) ||
-         (!estateType.HasValue || est.EstateType == estateType) ||
-         (!contractType.HasValue || est.ContractType == contractType)
+            var data = await content.Skip((searchDto.pageNumber - 1) * searchDto.pageSize).Take(searchDto.pageSize)
+                        .Select(x => new GetEstateDto
+                        {
+                            Id = x.Id,
+                            EstateType = x.EstateType.ToString(),
+                            ContractType = x.ContractType.ToString(),
+                            Price = x.Price,
+                            Area = x.Area,
+                            Description = x.Description,
+                            street = x.Street.Name,
+                            city = x.Street.City.Name,
+                            country = x.Street.City.Country.Name,
+                            MainImage = x.MainImage,
+                         }).ToListAsync();
+            var totalCount = await content.CountAsync();
 
-                          select new Data.Model.Estate
-                          {
-                              Id = est.Id,
-                              EstateType = est.EstateType,
-                              ContractType = est.ContractType,
-                              Price = est.Price,
-                              Area = est.Area,
-                              Description = est.Description,
-                              StreetId = est.StreetId,
-                              UserId = est.UserId,
-                              Images = est.Images,
-                              IsDelete = est.IsDelete,
-                          };
 
-          
+            var paginatedList = new PaginatedList<GetEstateDto>(data, totalCount, searchDto.pageNumber, searchDto.pageSize);
 
-                
-                    content = content.OrderBy(a => a.CreateAt);
-                  
-            
-
-           // int totalRecords = content.Count();
-            int pageSize = 10;
-           // int totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
-            content = content.Skip((currentPage - 1) * pageSize).Take(pageSize);
-
-            contentData.GetEstates = await content.ToListAsync();
-            contentData.CurrentPage = currentPage;
-            //contentData.TotalPages = totalPages;
-            contentData.Term = term;
-            contentData.PageSize = pageSize;
-      //      contentData.OrderBy = orderBy;
-
-            return contentData;
+            return paginatedList;
         }
-
-
     }
 }

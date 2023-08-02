@@ -6,14 +6,14 @@ namespace Aqar.Core.Enums
     public enum EstateType
     {
         [Display(Name = "بناية")]
-        Building =0,
+        Building =1,
         [Display(Name = "منزل")]
-        Appartment =1,
+        Appartment =2,
         [Display(Name = "مخزن")]
-        Warehouse =2,
+        Warehouse =3,
         [Display(Name = "أرض")]
-        Land =3,
+        Land =4,
         [Display(Name = "شاليه")]
-        Chalet =4,
+        Chalet =5,
     }
 }

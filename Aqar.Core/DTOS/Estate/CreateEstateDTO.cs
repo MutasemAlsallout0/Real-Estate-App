@@ -10,6 +10,8 @@ namespace Aqar.Core.DTOS.Estate
         public double Price { get; set; }
         public double Area { get; set; }
         public string Description { get; set; }
+        public IFormFile MainImage { get; set; }
+
         public List<IFormFile> Imagesfile { get; set; }
         public string UserId { get; set; }
         public int StreetId { get; set; }

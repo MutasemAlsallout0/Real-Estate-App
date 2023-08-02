@@ -11,6 +11,8 @@ namespace Aqar.Data.Model
         public string Description { get; set; } = string.Empty;
 
          public bool SeenByAdmin { get; set; }
+        public string MainImage { get; set; }
+
         public List<Attachment> Images { get; set; }
         public string UserId { get; set; }  
         public AppUser? User { get; set; }

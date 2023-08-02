@@ -11,6 +11,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -159,7 +160,7 @@ namespace Aqar.Infrastructure.Managers.Auth
                     await _userManager.AddToRoleAsync(user, RolesName.OfficeOwner);
 
                  }
-            var publicPage = await _publicPageRepository.CreatePublicPageForOfficeOwner(user.Id, model.OfficeName);
+            var publicPage = await _publicPageRepository.CreatePublicPageForOfficeOwner(user.Id);
 
 
             return new AuthenticationResponse
@@ -255,18 +256,31 @@ namespace Aqar.Infrastructure.Managers.Auth
 
             return true;
         }
-
-
-        public async Task<bool> ResetPasswordAsync(string email, string token, string newPassword)
+        public class RestPAssword
         {
-            var user = await _userManager.FindByEmailAsync(email);
+
+            public string UserId { get; set; }
+            [DataType(DataType.Password)]
+
+            public string NewPassword { get; set; }
+            [DataType(DataType.Password)]
+            [Compare("NewPassword", ErrorMessage = "Password and confirm password do not match.")]
+            public string ConfirmPassword { get; set; }
+            public string token { get; set; }
+
+
+        }
+
+        public async Task<bool> ResetPasswordAsync(RestPAssword restPAssword)
+        {
+            var user = await _userManager.FindByIdAsync(restPAssword.UserId);
             if (user == null)
             {
                 // يمكنك هنا التعامل مع رسالة الخطأ المناسبة إذا كان البريد غير مسجل
                 return false;
             }
 
-            var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+            var result = await _userManager.ResetPasswordAsync(user, restPAssword.token, restPAssword.NewPassword);
             if (result.Succeeded)
             {
                 // يمكنك هنا إجراءات إضافية بمجرد إعادة تعيين كلمة المرور بنجاح
