@@ -1,9 +1,11 @@
-﻿namespace Aqar.Infrastructure.Repositories.Preferences
+﻿using Aqar.Core.DTOS.ApiBase;
+
+namespace Aqar.Infrastructure.Repositories.Preferences
 {
     public interface IPreferencesRepository
     {
-        Task<string> AddToFavorite(string userId, int estateId);
-        Task<List<Data.Model.Estate>> GetUserFavoriteEstates(string userId);
-        Task<string> DeleteFromFavorite(string userId, int estateId);
+        Task<string> AddToFavorite(UserModel currentUser, int estateId);
+        Task<List<Data.Model.Estate>> GetUserFavoriteEstates(UserModel currentUser);
+        Task<string> DeleteFromFavorite(UserModel currentUser,  int estateId);
     }
 }

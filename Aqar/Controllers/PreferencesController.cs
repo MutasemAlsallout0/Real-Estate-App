@@ -6,7 +6,7 @@ namespace Aqar.Controllers
 {
     [ApiController]
     [Authorize]
-    public class PreferencesController : ControllerBase
+    public class PreferencesController : ApiBaseController
     {
         private readonly IPreferencesRepository _preferencesRepository;
         public PreferencesController(IPreferencesRepository preferencesRepository)
@@ -15,25 +15,25 @@ namespace Aqar.Controllers
         }
 
         [HttpGet]
-        [Route("api/preferences/getUserFavoriteEstates/{userId}")]
-        public async Task<IActionResult> GetUserFavoriteEstates(string userId)
+        [Route("api/preferences/getUserFavoriteEstates")]
+        public async Task<IActionResult> GetUserFavoriteEstates()
         {
-            return Ok(await _preferencesRepository.GetUserFavoriteEstates(userId));
+            return Ok(await _preferencesRepository.GetUserFavoriteEstates(LoggedInUser));
         }
 
         [HttpPost]
         [Route("api/preferences/addToFavorite")]
-        public async Task<IActionResult> AddToFavorite(string userId, int estateId)
+        public async Task<IActionResult> AddToFavorite(int estateId)
         {
-            return Ok(await _preferencesRepository.AddToFavorite(userId, estateId));
+            return Ok(await _preferencesRepository.AddToFavorite(LoggedInUser, estateId));
         }
 
 
         [HttpDelete]
         [Route("api/preferences/deleteFromFavorite")]
-        public async Task<IActionResult> DeleteFromFavorite(string userId, int estateId)
+        public async Task<IActionResult> DeleteFromFavorite(int estateId)
         {
-            return Ok(await _preferencesRepository.DeleteFromFavorite(userId, estateId));
+            return Ok(await _preferencesRepository.DeleteFromFavorite(LoggedInUser, estateId));
         }
     }
 }
