@@ -55,24 +55,27 @@ builder.Services.AddSwaggerGen( c =>
                 });
 });
 builder.Services.AddHttpContextAccessor();
-//builder.Services.AddCors(c => c.AddPolicy("CorsPolicy", p => p.AllowAnyOrigin().AllowAnyHeader()
-//.AllowAnyMethod()
-//));
+builder.Services.AddCors(c => c.AddPolicy("CorsPolicy", p => p.AllowAnyOrigin().AllowAnyHeader()
+.AllowAnyMethod()));
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI();
+//}
+app.UseSwagger();
+app.UseSwaggerUI();
 Log.Logger = new LoggerConfiguration()
                 .WriteTo.File("Logs/log.txt", rollingInterval: RollingInterval.Minute)
                 .CreateLogger();
 var environment = app.Services.GetRequiredService<IWebHostEnvironment>();
 app.ConfigureExceptionHandler(Log.Logger, environment);
 
+app.UseStaticFiles();
 app.UseHttpsRedirection();
+app.UseCors("CorsPolicy");
 app.UseAuthentication();
 
 app.UseAuthorization();

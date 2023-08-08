@@ -1,3 +1,4 @@
+using Aqar.Core.DTOS.ApiBase;
 using Aqar.Core.DTOS.Auth.Request;
 using Aqar.Core.DTOS.Estate;
 using Aqar.Core.DTOS.PublicPage;
@@ -11,7 +12,8 @@ namespace Aqar.Infrastructure.AutoMapper
         public MappingProfile()
         {
             #region User
-            CreateMap<CustomerRegisterRequest, AppUser>();
+            CreateMap<CustomerRegisterRequest, AppUser>().ReverseMap();
+            CreateMap<UserModel, AppUser>().ReverseMap();
 
             #endregion
 

@@ -1,11 +1,7 @@
-﻿using Aqar.Data.DataLayer;
-using Aqar.Data.Model;
+﻿using Aqar.Data.Model;
 using Aqar.Infrastructure.Repositories.PublicPage;
-using DocumentFormat.OpenXml.Vml.Office;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using static Aqar.Infrastructure.Repositories.PublicPage.PublicPageRepository;
 
 namespace Aqar.Controllers
@@ -19,7 +15,8 @@ namespace Aqar.Controllers
         {
             _publicPageRepository = publicPageRepository;
         }
-        [HttpGet("search")]
+        [HttpGet]
+        [Route("api/publicPage/searchOffices")]
         public async Task<ActionResult<PagedResult<AppUser>>> SearchOffices(string?officeName, int page = 1, int pageSize = 10)
         {
             var result = await _publicPageRepository.SearchOfficesByNameAsync(officeName, page, pageSize);

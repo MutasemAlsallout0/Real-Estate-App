@@ -4,7 +4,7 @@ namespace Aqar.Core.DTOS.Estate
     {
         public int Id { get; set; }
         public string OwnerEstate { get; set; }
-
+        public string? UserImage { get; set; }
         public string EstateType { get; set; }
         public string ContractType { get; set; }
         public double Price { get; set; }

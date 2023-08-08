@@ -13,7 +13,6 @@ namespace Aqar.Core.DTOS.Estate
         public IFormFile MainImage { get; set; }
 
         public List<IFormFile> Imagesfile { get; set; }
-        public string UserId { get; set; }
         public int StreetId { get; set; }
     }
 }

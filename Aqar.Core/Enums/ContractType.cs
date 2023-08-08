@@ -1,10 +1,15 @@
+﻿
+using System.ComponentModel.DataAnnotations;
+using System.Xml.Linq;
 
 namespace Aqar.Core.Enums
 {
     public enum ContractType
     {
-        Selling=1,
-        Rent=2,
+        [Display(Name = "ملك")]
+        Selling = 1,
+        [Display(Name = "اجار")]
+        Rent = 2,
 
     }
 }

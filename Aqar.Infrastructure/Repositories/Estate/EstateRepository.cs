@@ -1,4 +1,5 @@
-﻿using Aqar.Core.DTOS.Estate;
+﻿using Aqar.Core.DTOS.ApiBase;
+using Aqar.Core.DTOS.Estate;
 using Aqar.Core.Enums;
 using Aqar.Data.DataLayer;
 using Aqar.Data.Model;
@@ -6,7 +7,6 @@ using Aqar.Infrastructure.Exceptions;
 using Aqar.Infrastructure.Extensions;
 using Aqar.Infrastructure.HelperServices.ImageHelper;
 using AutoMapper;
-using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,17 +17,15 @@ namespace Aqar.Infrastructure.Repositories.Estate
         private readonly AqarDbContext _context;
         private readonly IMapper _mapper;
         private readonly IImageService _imageService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        public EstateRepository(AqarDbContext context,
-            IMapper mapper,
-            IImageService imageService,
-            IHttpContextAccessor httpContextAccessor)
+         public EstateRepository(AqarDbContext context,
+                                IMapper mapper,
+                                IImageService imageService)
         {
             _context = context;
             _mapper = mapper;
             _imageService = imageService;
-            _httpContextAccessor = httpContextAccessor;
-        }
+         }
+ 
         public async Task<PaginatedList<GetEstateDto>> GetPaginatedDataAsync(int pageNumber, int pageSize, EstateType? estateType)
         {
             var query = _context.Estates.AsQueryable().Where(x => x.SeenByAdmin == true);
@@ -43,8 +41,9 @@ namespace Aqar.Infrastructure.Repositories.Estate
                                      {
                                          Id = x.Id,
                                          OwnerEstate = x.User.GetFullName(),
-                                         EstateType = x.EstateType.ToString(),
-                                         ContractType = x.ContractType.ToString(),
+                                         UserImage = x.User.UserImage,
+                                         EstateType = x.DisplayEstateType,
+                                         ContractType = x.DisplayContractType,
                                          Price = x.Price,
                                          Area = x.Area,
                                          Description = x.Description,
@@ -81,14 +80,15 @@ namespace Aqar.Infrastructure.Repositories.Estate
                     Images = imagesUrls,
                     Description = estate.Description,
                     Price = estate.Price,
-                    EstateType = estate.EstateType.ToString(),
-                    ContractType = estate.ContractType.ToString(),
+                    EstateType = estate.DisplayEstateType,
+                    ContractType = estate.DisplayContractType,
                     street = estate.Street.Name,
                     city = estate.Street.City.Name,
                     country = estate.Street.City.Country.Name,
                     OwnerEstate = estate.User.GetFullName(),
                     Area = estate.Area,
                     MainImage = estate.MainImage,
+                    UserImage = estate.User.UserImage,
 
                 };
 
@@ -104,11 +104,11 @@ namespace Aqar.Infrastructure.Repositories.Estate
         }
 
 
-        public async Task<Data.Model.Estate> Create( CreateEstateDTO input)
+        public async Task<Data.Model.Estate> Create(UserModel currentUser, CreateEstateDTO input)
         {
 
             var estate = _mapper.Map<Data.Model.Estate>(input);
-
+            estate.UserId = currentUser.Id;
             if (input.MainImage != null)
             {
                 estate.MainImage = await _imageService.SaveImage(input.MainImage, "Images");

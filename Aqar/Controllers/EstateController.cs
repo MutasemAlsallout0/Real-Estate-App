@@ -11,7 +11,7 @@ namespace Aqar.Controllers
 {
     [ApiController]
     [Authorize]
-    public class EstateController : ControllerBase
+    public class EstateController : ApiBaseController
     {
         private readonly IEstateRepository _estateRepository;
         private readonly IImageService _imageService;
@@ -40,7 +40,7 @@ namespace Aqar.Controllers
         [Route("api/estate/addEstate")]
         public async Task<IActionResult> AddEstate([FromForm]CreateEstateDTO input)
         {
-           var result= await _estateRepository.Create(input);
+           var result= await _estateRepository.Create(LoggedInUser, input);
 
             if (input.Imagesfile != null)
             {

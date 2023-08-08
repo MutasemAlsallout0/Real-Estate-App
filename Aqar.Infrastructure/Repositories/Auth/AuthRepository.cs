@@ -50,9 +50,9 @@ namespace Aqar.Infrastructure.Managers.Auth
         public async Task<AuthenticationResponse> RegisterCustomer(CustomerRegisterRequest model)
         {
 
-            //var checkFromDbUser = _userManager.FindByEmailAsync(model.Email);
+            var checkFromDbUser = _context.Users.Any(x => x.Email.Equals(model.Email));
 
-            //if (checkFromDbUser != null) throw new ServiceValidationException("انت لديك حساب مسبقا");
+            if (checkFromDbUser) throw new ServiceValidationException("انت لديك حساب مسبقا");
 
 
             var user = new AppUser()
@@ -120,9 +120,10 @@ namespace Aqar.Infrastructure.Managers.Auth
         public async Task<AuthenticationResponse> RegisterOfficeOwner(OfficeOwnerRegisterRequest model)
         {
 
-            //var checkFromDbUser = _userManager.FindByEmailAsync(model.Email);
 
-            //if (checkFromDbUser != null) throw new ServiceValidationException("انت لديك حساب مسبقا");
+            var checkFromDbUser = _context.Users.Any(x => x.Email.Equals(model.Email));
+
+            if (checkFromDbUser) throw new ServiceValidationException("انت لديك حساب مسبقا");
 
             var user = new AppUser()
                 {
@@ -196,10 +197,10 @@ namespace Aqar.Infrastructure.Managers.Auth
             // Claims
             List<Claim> claims = new List<Claim>()
             {
-                new Claim(ClaimTypes.NameIdentifier,"Id"),
-                new Claim(ClaimTypes.Name , user.UserName),
-                new Claim("Email" , user.Email),
-
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(JwtRegisteredClaimNames.Sub, $"{user.FirstName}  {user.LastName}"),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+  
 
             };
 
