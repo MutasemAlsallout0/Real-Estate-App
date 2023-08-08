@@ -1,4 +1,5 @@
-﻿using Aqar.Core.Enums;
+﻿using Aqar.Core.DTOS.ApiBase;
+using Aqar.Core.Enums;
 using Aqar.Data.DataLayer;
 using Aqar.Data.Model;
 using Aqar.Infrastructure.Exceptions;
@@ -74,10 +75,10 @@ namespace Aqar.Infrastructure.Repositories.PublicPage
 
 
 
-        public async Task<List<EstateWithOfficeDetails>> GetEstatesWithOfficeDetailsForUser(string userId)
+        public async Task<List<EstateWithOfficeDetails>> GetEstatesWithOfficeDetailsForUser(UserModel currentUser)
         {
-            var estatesWithOfficeDetails =await _context.Estates
-                .Where(e => e.UserId == userId)
+            var estatesWithOfficeDetails =await _context.Estates.Include(x => x.User)
+                .Where(e => e.UserId == currentUser.Id)
                 .Select(e => new EstateWithOfficeDetails
                 {
                     EstateId = e.Id,
@@ -97,16 +98,16 @@ namespace Aqar.Infrastructure.Repositories.PublicPage
             return estatesWithOfficeDetails;
         }
 
-        public async Task<string> FollowPublicPage(string userId, int publicPageId)
+        public async Task<string> FollowPublicPage(UserModel currentUser, int publicPageId)
         {
             var existingFollow = await _context.Followings
-                .FirstOrDefaultAsync(f => f.UserId == userId && f.PublicPageId == publicPageId);
+                .FirstOrDefaultAsync(f => f.UserId == currentUser.Id && f.PublicPageId == publicPageId);
 
             if (existingFollow != null) throw new ServiceValidationException("انت متابع الصفحة مسبقا");
 
             var following = new Following
                 {
-                    UserId = userId,
+                    UserId = currentUser.Id,
                     PublicPageId = publicPageId,
                     IsFollow = true
                 };
@@ -122,9 +123,9 @@ namespace Aqar.Infrastructure.Repositories.PublicPage
 
          }
 
-        public async Task<string> UnFollowPublicPage(string userId)
+        public async Task<string> UnFollowPublicPage(UserModel currentUser)
         {
-            var existingFollow = await _context.Followings.FirstOrDefaultAsync(x => x.UserId == userId);
+            var existingFollow = await _context.Followings.FirstOrDefaultAsync(x => x.UserId == currentUser.Id);
 
             if (existingFollow == null) throw new ServiceValidationException("انت غير متابع الصفحة");
 

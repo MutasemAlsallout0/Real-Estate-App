@@ -8,7 +8,7 @@ namespace Aqar.Controllers
 {
     [ApiController]
     
-    public class PublicPageController : ControllerBase
+    public class PublicPageController : ApiBaseController
     {
         private readonly IPublicPageRepository _publicPageRepository;
         public PublicPageController(IPublicPageRepository publicPageRepository)
@@ -24,10 +24,10 @@ namespace Aqar.Controllers
         }
 
         [HttpGet]
-        [Route("api/publicPage/getEstatesWithOfficeDetails/{userId}")]
-        public async Task<IActionResult> GetEstatesWithOfficeDetails(string userId)
+        [Route("api/publicPage/getEstatesWithOfficeDetails")]
+        public async Task<IActionResult> GetEstatesWithOfficeDetails()
         {
-            var estatesWithOfficeDetails = await _publicPageRepository.GetEstatesWithOfficeDetailsForUser(userId);
+            var estatesWithOfficeDetails = await _publicPageRepository.GetEstatesWithOfficeDetailsForUser(LoggedInUser);
 
             return Ok(estatesWithOfficeDetails);
         }
@@ -35,20 +35,20 @@ namespace Aqar.Controllers
         [HttpPost]
         [Route("api/publicPage/followPublicPage")]
         [Authorize]
-        public async Task<IActionResult> FollowPublicPage(string userId, int publicPageId)
+        public async Task<IActionResult> FollowPublicPage(int publicPageId)
         {
             //var currentUserId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            return Ok(await _publicPageRepository.FollowPublicPage(userId, publicPageId));
+            return Ok(await _publicPageRepository.FollowPublicPage(LoggedInUser, publicPageId));
         }
 
         [HttpPost]
         [Route("api/publicPage/UnFollowPublicPage")]
         [Authorize]
-        public async Task<IActionResult> UnFollowPublicPage(string userId)
+        public async Task<IActionResult> UnFollowPublicPage()
         {
        
-            return Ok(await _publicPageRepository.UnFollowPublicPage(userId));
+            return Ok(await _publicPageRepository.UnFollowPublicPage(LoggedInUser));
         }
     }
 }
