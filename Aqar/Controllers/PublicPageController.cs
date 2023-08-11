@@ -24,10 +24,10 @@ namespace Aqar.Controllers
         }
 
         [HttpGet]
-        [Route("api/publicPage/getEstatesWithOfficeDetails")]
-        public async Task<IActionResult> GetEstatesWithOfficeDetails()
+        [Route("api/publicPage/getEstateseDetailsForUserLogin")]
+        public async Task<IActionResult> GetEstateseDetailsForUserLogin()
         {
-            var estatesWithOfficeDetails = await _publicPageRepository.GetEstatesWithOfficeDetailsForUser(LoggedInUser);
+            var estatesWithOfficeDetails = await _publicPageRepository.GetEstateseDetailsForUserLogin(LoggedInUser);
 
             return Ok(estatesWithOfficeDetails);
         }
@@ -37,7 +37,6 @@ namespace Aqar.Controllers
         [Authorize]
         public async Task<IActionResult> FollowPublicPage(int publicPageId)
         {
-            //var currentUserId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             return Ok(await _publicPageRepository.FollowPublicPage(LoggedInUser, publicPageId));
         }

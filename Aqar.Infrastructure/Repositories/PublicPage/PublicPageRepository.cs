@@ -1,4 +1,5 @@
 ﻿using Aqar.Core.DTOS.ApiBase;
+using Aqar.Core.DTOS.Estate;
 using Aqar.Core.Enums;
 using Aqar.Data.DataLayer;
 using Aqar.Data.Model;
@@ -75,23 +76,27 @@ namespace Aqar.Infrastructure.Repositories.PublicPage
 
 
 
-        public async Task<List<EstateWithOfficeDetails>> GetEstatesWithOfficeDetailsForUser(UserModel currentUser)
+        public async Task<List<GetEstateDto>> GetEstateseDetailsForUserLogin(UserModel currentUser)
         {
-            var estatesWithOfficeDetails =await _context.Estates.Include(x => x.User)
+            var estatesWithOfficeDetails =await _context.Estates.Include(z => z.User)
+                .Include(x => x.Street).ThenInclude(x => x.City).ThenInclude(x => x.Country)
                 .Where(e => e.UserId == currentUser.Id)
-                .Select(e => new EstateWithOfficeDetails
+                .Select(x => new GetEstateDto
                 {
-                    EstateId = e.Id,
-                    EstateType = e.EstateType,
-                    ContractType = e.ContractType,
-                    Price = e.Price,
-                    Area = e.Area,
-                    Description = e.Description,
-                    SeenByAdmin = e.SeenByAdmin,
-                    Images = e.Images,
-                    OfficeId = e.User.Id,
-                    OfficeName = e.User.OfficeName,
-                    OfficeImage = e.User.UserImage
+                    Id = x.Id,
+                    OwnerEstate = x.User.GetFullName(),
+                    UserImage = x.User.UserImage,
+                    EstateType = x.DisplayEstateType,
+                    ContractType = x.DisplayContractType,
+                    Price = x.Price,
+                    Area = x.Area,
+                    Description = x.Description,
+                    street = x.Street.Name,
+                    city = x.Street.City.Name,
+                    country = x.Street.City.Country.Name,
+                    MainImage = x.MainImage,
+                    CreateAt = x.CreateAt,
+                    IsOwner = true
                 })
                 .ToListAsync();
 
