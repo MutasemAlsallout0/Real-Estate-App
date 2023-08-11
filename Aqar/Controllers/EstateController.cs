@@ -22,6 +22,22 @@ namespace Aqar.Controllers
         
         }
 
+
+        [HttpGet]
+        [Route("api/estate/getCountries")]
+        public async Task<IActionResult> GetCountries()
+        {
+            return Ok(await _estateRepository.GetCountries());
+        }
+
+        [HttpGet]
+        [Route("api/estate/getCities/{countryId}")]
+        public async Task<IActionResult> GetCities(int countryId)
+        {
+            return Ok(await _estateRepository.GetCities(countryId));
+        }
+
+
         [HttpGet]
         [Route("api/estate/getAllEstate")]
         public async Task<IActionResult> GetAllEstate([FromQuery] int pageNumber, int pageSize, EstateType? estateType)

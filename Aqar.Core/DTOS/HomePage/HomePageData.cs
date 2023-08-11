@@ -10,10 +10,10 @@ namespace Aqar.Core.DTOS.HomePage
 
    public class EstateData
     {
-        public List<EstateDTO> BuildingEstate { get; set; }
-        public List<EstateDTO> AppartmentEstate { get; set; }
-        public List<EstateDTO> WarehouseEstate { get; set; }
-        public List<EstateDTO> LandEstate { get; set; }
-        public List<EstateDTO> ChaletEstate { get; set; }
+        public List<GetEstateDto> BuildingEstate { get; set; }
+        public List<GetEstateDto> AppartmentEstate { get; set; }
+        public List<GetEstateDto> WarehouseEstate { get; set; }
+        public List<GetEstateDto> LandEstate { get; set; }
+        public List<GetEstateDto> ChaletEstate { get; set; }
     }
 }

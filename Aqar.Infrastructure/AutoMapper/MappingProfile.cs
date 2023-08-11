@@ -27,6 +27,8 @@ namespace Aqar.Infrastructure.AutoMapper
                 .ForMember(x => x.ContractType, x => x.MapFrom(y => y.ContractType.ToString()));
             CreateMap<CreateEstateDTO, Estate>().ReverseMap();
             CreateMap<UpdateEstateDTO, Estate>().ReverseMap();
+            CreateMap<GetEstateDto, Estate>().ReverseMap();
+
             #endregion
 
 

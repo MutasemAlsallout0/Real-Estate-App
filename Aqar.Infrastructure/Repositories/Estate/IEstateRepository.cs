@@ -14,5 +14,8 @@ namespace Aqar.Infrastructure.Repositories.Estate
         Task<Data.Model.Estate> UpdateEstate(UpdateEstateDTO input);
         Task<string> DeleteEstate(int id);
         Task<GetEstateDto> GetEstate(int Id);
+        Task<List<Country>> GetCountries();
+        Task<List<City>> GetCities(int countryId);
+
     }
 }

@@ -7,6 +7,8 @@ namespace Aqar.Controllers
 {
     [ApiController]
     [Authorize(Roles = RolesName.Admin)]
+    [ApiExplorerSettings(IgnoreApi = true)]
+
     public class AdminController : ControllerBase
     {
         private readonly IAdminRepository _adminRepository;

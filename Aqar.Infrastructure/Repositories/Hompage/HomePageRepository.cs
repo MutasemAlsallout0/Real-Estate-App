@@ -4,6 +4,7 @@ using Aqar.Core.Enums;
 using Aqar.Data.DataLayer;
 using Aqar.Infrastructure.Extensions;
 using AutoMapper;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.EntityFrameworkCore;
 
 namespace Aqar.Infrastructure.Repositories.Hompage
@@ -34,43 +35,110 @@ namespace Aqar.Infrastructure.Repositories.Hompage
 
         public async Task<EstateData> EstateDataAsync()
         {
-            var data = await _context.Estates.ToListAsync();
+            var data = await _context.Estates.Include(z => z.User)
+                .Include(x => x.Street).ThenInclude(x => x.City).ThenInclude(x => x.Country).ToListAsync();
 
             var bulid=  data
                 .Where(x => x.EstateType == EstateType.Building)
                 .OrderBy(content => content.CreateAt)
                 .Take(5)
-                .Select(content => _mapper.Map<EstateDTO>(content))
+                .Select(x => new GetEstateDto
+                {
+                    Id = x.Id,
+                    OwnerEstate = x.User.GetFullName(),
+                    UserImage = x.User.UserImage,
+                    EstateType = x.DisplayEstateType,
+                    ContractType = x.DisplayContractType,
+                    Price = x.Price,
+                    Area = x.Area,
+                    Description = x.Description,
+                    street = x.Street.Name,
+                    city = x.Street.City.Name,
+                    country = x.Street.City.Country.Name,
+                    MainImage = x.MainImage,
+                })
                 .ToList();
 
             var appartment = data
             .Where(x => x.EstateType == EstateType.Appartment)
             .OrderBy(content => content.CreateAt)
             .Take(5)
-            .Select(content => _mapper.Map<EstateDTO>(content))
-            .ToList();
+                .Select(x => new GetEstateDto
+                {
+                    Id = x.Id,
+                    OwnerEstate = x.User.GetFullName(),
+                    UserImage = x.User.UserImage,
+                    EstateType = x.DisplayEstateType,
+                    ContractType = x.DisplayContractType,
+                    Price = x.Price,
+                    Area = x.Area,
+                    Description = x.Description,
+                    street = x.Street.Name,
+                    city = x.Street.City.Name,
+                    country = x.Street.City.Country.Name,
+                    MainImage = x.MainImage,
+                }).ToList();
 
         var warehouse = data
           .Where(x => x.EstateType == EstateType.Warehouse)
           .OrderBy(content => content.CreateAt)
           .Take(5)
-          .Select(content => _mapper.Map<EstateDTO>(content))
-          .ToList();
+                .Select(x => new GetEstateDto
+                {
+                    Id = x.Id,
+                    OwnerEstate = x.User.GetFullName(),
+                    UserImage = x.User.UserImage,
+                    EstateType = x.DisplayEstateType,
+                    ContractType = x.DisplayContractType,
+                    Price = x.Price,
+                    Area = x.Area,
+                    Description = x.Description,
+                    street = x.Street.Name,
+                    city = x.Street.City.Name,
+                    country = x.Street.City.Country.Name,
+                    MainImage = x.MainImage,
+                }).ToList();
 
 
             var land = data
               .Where(x => x.EstateType == EstateType.Land)
               .OrderBy(content => content.CreateAt)
               .Take(5)
-              .Select(content => _mapper.Map<EstateDTO>(content))
-              .ToList();
+                .Select(x => new GetEstateDto
+                {
+                    Id = x.Id,
+                    OwnerEstate = x.User.GetFullName(),
+                    UserImage = x.User.UserImage,
+                    EstateType = x.DisplayEstateType,
+                    ContractType = x.DisplayContractType,
+                    Price = x.Price,
+                    Area = x.Area,
+                    Description = x.Description,
+                    street = x.Street.Name,
+                    city = x.Street.City.Name,
+                    country = x.Street.City.Country.Name,
+                    MainImage = x.MainImage,
+                }).ToList();
 
             var chalet = data
               .Where(x => x.EstateType == EstateType.Chalet)
               .OrderBy(content => content.CreateAt)
               .Take(5)
-              .Select(content => _mapper.Map<EstateDTO>(content))
-              .ToList();
+                .Select(x => new GetEstateDto
+                {
+                    Id = x.Id,
+                    OwnerEstate = x.User.GetFullName(),
+                    UserImage = x.User.UserImage,
+                    EstateType = x.DisplayEstateType,
+                    ContractType = x.DisplayContractType,
+                    Price = x.Price,
+                    Area = x.Area,
+                    Description = x.Description,
+                    street = x.Street.Name,
+                    city = x.Street.City.Name,
+                    country = x.Street.City.Country.Name,
+                    MainImage = x.MainImage,
+                }).ToList();
 
             return new EstateData{
                 BuildingEstate=bulid,
@@ -90,20 +158,21 @@ namespace Aqar.Infrastructure.Repositories.Hompage
                                         .Include(x => x.Street)
                                             .ThenInclude(x => x.City)
                                                 .ThenInclude(x => x.Country)
+                                                .Include(x => x.User)
                                                 .OrderByDescending(a => a.CreateAt)
-                                                .Where(est => est.SeenByAdmin == true).AsQueryable();
+                                                .AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(searchDto.street))
+            if (searchDto.streetId != 0)
             {
-                content = content.Where(x => x.Street.Name.ToLower().Contains(searchDto.street.ToLower()));
+                content = content.Where(x => x.StreetId == searchDto.streetId);
             }
-            if (!string.IsNullOrWhiteSpace(searchDto.city))
+            if (searchDto.cityId != 0)
             {
-                content = content.Where(x => x.Street.City.Name.ToLower().Contains(searchDto.city.ToLower()));
+                content = content.Where(x => x.CityId == searchDto.cityId);
             }
-            if (!string.IsNullOrWhiteSpace(searchDto.country))
+            if (searchDto.countryId != 0)
             {
-                content = content.Where(x => x.Street.City.Country.Name.ToLower().Contains(searchDto.country.ToLower()));
+                content = content.Where(x => x.CountryId == searchDto.countryId);
             }
             if (searchDto.contractType != 0)
             {
@@ -118,6 +187,8 @@ namespace Aqar.Infrastructure.Repositories.Hompage
                         .Select(x => new GetEstateDto
                         {
                             Id = x.Id,
+                            OwnerEstate = x.User.GetFullName(),
+                            UserImage = x.User.UserImage,
                             EstateType = x.EstateType.ToString(),
                             ContractType = x.ContractType.ToString(),
                             Price = x.Price,
@@ -127,6 +198,7 @@ namespace Aqar.Infrastructure.Repositories.Hompage
                             city = x.Street.City.Name,
                             country = x.Street.City.Country.Name,
                             MainImage = x.MainImage,
+                            
                          }).ToListAsync();
             var totalCount = await content.CountAsync();
 

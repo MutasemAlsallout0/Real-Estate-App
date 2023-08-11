@@ -1,7 +1,7 @@
 ﻿using Aqar.Core.DTOS.HomePage;
 using Aqar.Infrastructure.Repositories.Hompage;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 
 
 namespace Aqar.Controllers
@@ -26,7 +26,7 @@ namespace Aqar.Controllers
 
         [HttpPost]
         [Route("api/mainHome/getContentsSearch")]
-        public async Task<IActionResult> GetContents( SearchDto searchDto) 
+        public async Task<IActionResult> GetContents([FromQuery]SearchDto searchDto) 
         {
             
                

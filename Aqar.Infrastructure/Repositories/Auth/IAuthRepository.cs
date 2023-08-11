@@ -14,7 +14,6 @@ namespace Aqar.Infrastructure.Managers.Auth
         Task<AuthenticationResponse> Login(LoginRequest request);
         Task<bool> SendResetPasswordEmailAsync(string email);
         Task<bool> ResetPasswordAsync(RestPAssword restPAssword);
-        //Task<bool> ResetPasswordAsync(string email, string token, string newPassword);
         Task<string> UpdateOfficeOwner(UpdateOfficeOwnerDto updateOfficeOwnerDto);
         Task<string> UpdateCustomer(UpdateCustomerrDto updateCustomerrDto);
         Task<bool> DeleteUser(string userId);

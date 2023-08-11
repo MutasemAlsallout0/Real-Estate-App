@@ -7,6 +7,7 @@ using Aqar.Infrastructure.Exceptions;
 using Aqar.Infrastructure.Extensions;
 using Aqar.Infrastructure.HelperServices.ImageHelper;
 using AutoMapper;
+using DocumentFormat.OpenXml.EMMA;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,7 +26,23 @@ namespace Aqar.Infrastructure.Repositories.Estate
             _mapper = mapper;
             _imageService = imageService;
          }
+
+        public async Task<List<Country>> GetCountries()
+        {
+            var countries = await _context.Countries.ToListAsync();
  
+
+            return countries;
+        }
+
+        public async Task<List<City>> GetCities(int countryId)
+        {
+            var cities = await _context.Cities.Where(x => x.CountryId == countryId).ToListAsync();
+
+
+            return cities;
+        }
+
         public async Task<PaginatedList<GetEstateDto>> GetPaginatedDataAsync(int pageNumber, int pageSize, EstateType? estateType)
         {
             var query = _context.Estates.AsQueryable().Where(x => x.SeenByAdmin == true);
@@ -106,14 +123,38 @@ namespace Aqar.Infrastructure.Repositories.Estate
 
         public async Task<Data.Model.Estate> Create(UserModel currentUser, CreateEstateDTO input)
         {
+            int newStreetId;
+
+            if (_context.Streets.Any(x => x.Name.Equals(input.StreetName)))
+            {
+               var updateStreet = await _context.Streets.FirstOrDefaultAsync(x => x.Name.ToLower() == input.StreetName.ToLower());
+                newStreetId = updateStreet.Id;
+            }
+            else
+            {
+                var newStreert = new Street
+                {
+                    CityId = input.CityId,
+                    Name = input.StreetName
+                };
+
+                var newStreet = _context.Streets.Add(newStreert);
+                await _context.SaveChangesAsync();
+
+                newStreetId = newStreert.Id;
+            }
+
 
             var estate = _mapper.Map<Data.Model.Estate>(input);
             estate.UserId = currentUser.Id;
+            estate.StreetId = newStreetId;
+             
             if (input.MainImage != null)
             {
                 estate.MainImage = await _imageService.SaveImage(input.MainImage, "Images");
             }
-            estate.SeenByAdmin = false;
+            //estate.SeenByAdmin = false;
+            estate.SeenByAdmin = true;
 
             await _context.Estates.AddAsync(estate);
             await _context.SaveChangesAsync();
