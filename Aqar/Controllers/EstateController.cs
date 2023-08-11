@@ -103,7 +103,7 @@ namespace Aqar.Controllers
         }
 
         [HttpDelete]
-        [Route("api/estate/deleteEstate")]
+        [Route("api/estate/deleteEstate/{id}")]
         public async Task<IActionResult> DeleteEstate(int id)
         {
             return Ok(await _estateRepository.DeleteEstate(id));

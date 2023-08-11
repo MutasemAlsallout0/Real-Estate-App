@@ -176,6 +176,28 @@ namespace Aqar.Infrastructure.Repositories.Estate
 
         public async Task<Data.Model.Estate> UpdateEstate(UpdateEstateDTO input)
         {
+            int newStreetId;
+
+            if (_context.Streets.Any(x => x.Name.Equals(input.StreetName)))
+            {
+                var updateStreet = await _context.Streets.FirstOrDefaultAsync(x => x.Name.ToLower() == input.StreetName.ToLower());
+                newStreetId = updateStreet.Id;
+            }
+            else
+            {
+                var newStreert = new Street
+                {
+                    CityId = input.CityId,
+                    Name = input.StreetName
+                };
+
+                var newStreet = _context.Streets.Add(newStreert);
+                await _context.SaveChangesAsync();
+
+                newStreetId = newStreert.Id;
+            }
+
+
             var dbestate = await _context.Estates.FirstOrDefaultAsync(x => x.Id == input.Id);
 
             if (dbestate == null) throw new ServiceValidationException("لا يوجد عقار!");
@@ -185,7 +207,15 @@ namespace Aqar.Infrastructure.Repositories.Estate
             dbestate.Price = input.Price;
             dbestate.Description = input.Description;
             dbestate.Area = input.Area;
-            dbestate.StreetId = input.StreetId;
+            dbestate.CityId = input.CityId;
+            dbestate.CountryId = input.CountryId;
+            dbestate.StreetId = newStreetId;
+
+            if (input.MainImage != null)
+            {
+                dbestate.MainImage = await _imageService.SaveImage(input.MainImage, "Images");
+            }
+
 
             var Result = _context.Estates.Update(dbestate);
 
@@ -197,7 +227,7 @@ namespace Aqar.Infrastructure.Repositories.Estate
 
         public async Task<string> DeleteEstate(int id)
         {
-            var dbestate = await _context.Estates.Include(x => x.Images).FirstOrDefaultAsync(x => x.Id == id);
+            var dbestate = await _context.Estates.Include(x => x.Images).SingleOrDefaultAsync(x => x.Id == id);
 
             if (dbestate == null) throw new ServiceValidationException("لا يوجد عقار!");
 
@@ -209,6 +239,9 @@ namespace Aqar.Infrastructure.Repositories.Estate
                     _context.Attachments.Remove(dbestateAttachment);
                 }
             }
+            var dbestatePreferences = await _context.Preferences.Where(x => x.EstateId == dbestate.Id).ToListAsync();
+
+            _context.Preferences.RemoveRange(dbestatePreferences);
 
             _context.Estates.Remove(dbestate);
 
