@@ -18,19 +18,19 @@ namespace Aqar.Infrastructure.Repositories.Estate
         private readonly AqarDbContext _context;
         private readonly IMapper _mapper;
         private readonly IImageService _imageService;
-         public EstateRepository(AqarDbContext context,
-                                IMapper mapper,
-                                IImageService imageService)
+        public EstateRepository(AqarDbContext context,
+                               IMapper mapper,
+                               IImageService imageService)
         {
             _context = context;
             _mapper = mapper;
             _imageService = imageService;
-         }
+        }
 
         public async Task<List<Country>> GetCountries()
         {
             var countries = await _context.Countries.ToListAsync();
- 
+
 
             return countries;
         }
@@ -68,6 +68,7 @@ namespace Aqar.Infrastructure.Repositories.Estate
                                          city = x.Street.City.Name,
                                          country = x.Street.City.Country.Name,
                                          MainImage = x.MainImage,
+                                         CreateAt = x.CreateAt,
                                      })
                                      .ToListAsync();
 
@@ -76,40 +77,50 @@ namespace Aqar.Infrastructure.Repositories.Estate
         }
 
 
-        public async Task<GetEstateDto> GetEstate(int Id)
+        public async Task<GetEstateDto> GetEstate(UserModel currentUser, int Id)
         {
             var estate = await _context.Estates
                 .Include(z => z.User)
                 .Include(x => x.Street).ThenInclude(x => x.City).ThenInclude(x => x.Country)
                 .FirstOrDefaultAsync(x => x.Id == Id && x.SeenByAdmin == true);
 
-            if (estate == null) 
+            if (estate == null)
                 throw new ServiceValidationException("لا يوجد عقار!");
-            
-                var imagesUrls = await _context.Attachments
-                    .Where(ei => ei.EstateId == estate.Id)
-                    .Select(ei => ei.Image)
-                    .ToListAsync();
 
-                var estateDTO = new GetEstateDto
-                {
-                    Id = estate.Id,
-                    Images = imagesUrls,
-                    Description = estate.Description,
-                    Price = estate.Price,
-                    EstateType = estate.DisplayEstateType,
-                    ContractType = estate.DisplayContractType,
-                    street = estate.Street.Name,
-                    city = estate.Street.City.Name,
-                    country = estate.Street.City.Country.Name,
-                    OwnerEstate = estate.User.GetFullName(),
-                    Area = estate.Area,
-                    MainImage = estate.MainImage,
-                    UserImage = estate.User.UserImage,
+            var imagesUrls = await _context.Attachments
+                .Where(ei => ei.EstateId == estate.Id)
+                .Select(ei => ei.Image)
+                .ToListAsync();
 
-                };
+            var estateDTO = new GetEstateDto
+            {
+                Id = estate.Id,
+                Images = imagesUrls,
+                Description = estate.Description,
+                Price = estate.Price,
+                EstateType = estate.DisplayEstateType,
+                ContractType = estate.DisplayContractType,
+                street = estate.Street.Name,
+                city = estate.Street.City.Name,
+                country = estate.Street.City.Country.Name,
+                OwnerEstate = estate.User.GetFullName(),
+                Area = estate.Area,
+                MainImage = estate.MainImage,
+                UserImage = estate.User.UserImage,
+                PhoneNumber = estate.User.PhoneNumber,
+                 CreateAt = estate.CreateAt,
 
-                return estateDTO;                    
+            };
+
+            if (currentUser.Id == estate.User.Id)
+            {
+                estateDTO.IsOwner = true;
+            }
+            else
+            {
+                estateDTO.IsOwner = false;
+            }
+            return estateDTO;
         }
 
 
@@ -127,7 +138,7 @@ namespace Aqar.Infrastructure.Repositories.Estate
 
             if (_context.Streets.Any(x => x.Name.Equals(input.StreetName)))
             {
-               var updateStreet = await _context.Streets.FirstOrDefaultAsync(x => x.Name.ToLower() == input.StreetName.ToLower());
+                var updateStreet = await _context.Streets.FirstOrDefaultAsync(x => x.Name.ToLower() == input.StreetName.ToLower());
                 newStreetId = updateStreet.Id;
             }
             else
@@ -148,7 +159,7 @@ namespace Aqar.Infrastructure.Repositories.Estate
             var estate = _mapper.Map<Data.Model.Estate>(input);
             estate.UserId = currentUser.Id;
             estate.StreetId = newStreetId;
-             
+
             if (input.MainImage != null)
             {
                 estate.MainImage = await _imageService.SaveImage(input.MainImage, "Images");
@@ -160,7 +171,7 @@ namespace Aqar.Infrastructure.Repositories.Estate
             await _context.SaveChangesAsync();
 
             return estate;
-           
+
         }
 
         public async Task<Data.Model.Estate> UpdateEstate(UpdateEstateDTO input)
@@ -176,7 +187,7 @@ namespace Aqar.Infrastructure.Repositories.Estate
             dbestate.Area = input.Area;
             dbestate.StreetId = input.StreetId;
 
-            var Result =  _context.Estates.Update(dbestate);
+            var Result = _context.Estates.Update(dbestate);
 
             await _context.SaveChangesAsync();
 
@@ -190,7 +201,7 @@ namespace Aqar.Infrastructure.Repositories.Estate
 
             if (dbestate == null) throw new ServiceValidationException("لا يوجد عقار!");
 
-             foreach (var estateImage in dbestate.Images.ToList())
+            foreach (var estateImage in dbestate.Images.ToList())
             {
                 var dbestateAttachment = await _context.Attachments.FirstOrDefaultAsync(x => x.Id == estateImage.Id);
                 if (dbestateAttachment != null)
@@ -199,7 +210,7 @@ namespace Aqar.Infrastructure.Repositories.Estate
                 }
             }
 
-             _context.Estates.Remove(dbestate);
+            _context.Estates.Remove(dbestate);
 
             await _context.SaveChangesAsync();
 

@@ -37,12 +37,18 @@ namespace Aqar.Data.Model
                         return "بناية";
                     case EstateType.Appartment:
                         return "منزل";
-                    case EstateType.Warehouse:
-                        return "مخزن";
+                    case EstateType.Garage:
+                        return "كراج";
                     case EstateType.Land:
                         return "أرض";
                     case EstateType.Chalet:
                         return "شاليه";
+                    case EstateType.Store:
+                        return "متجر";
+                    case EstateType.Room:
+                        return "غرفة";
+                    case EstateType.Office:
+                        return "مكتب";
                     default:
                         return EstateType.ToString();
                 }

@@ -56,6 +56,8 @@ namespace Aqar.Infrastructure.Repositories.Hompage
                     city = x.Street.City.Name,
                     country = x.Street.City.Country.Name,
                     MainImage = x.MainImage,
+                    CreateAt = x.CreateAt,
+
                 })
                 .ToList();
 
@@ -77,10 +79,12 @@ namespace Aqar.Infrastructure.Repositories.Hompage
                     city = x.Street.City.Name,
                     country = x.Street.City.Country.Name,
                     MainImage = x.MainImage,
+                    CreateAt = x.CreateAt,
+
                 }).ToList();
 
-        var warehouse = data
-          .Where(x => x.EstateType == EstateType.Warehouse)
+        var office = data
+          .Where(x => x.EstateType == EstateType.Office)
           .OrderBy(content => content.CreateAt)
           .Take(5)
                 .Select(x => new GetEstateDto
@@ -97,6 +101,8 @@ namespace Aqar.Infrastructure.Repositories.Hompage
                     city = x.Street.City.Name,
                     country = x.Street.City.Country.Name,
                     MainImage = x.MainImage,
+                    CreateAt = x.CreateAt,
+
                 }).ToList();
 
 
@@ -118,6 +124,8 @@ namespace Aqar.Infrastructure.Repositories.Hompage
                     city = x.Street.City.Name,
                     country = x.Street.City.Country.Name,
                     MainImage = x.MainImage,
+                    CreateAt = x.CreateAt,
+
                 }).ToList();
 
             var chalet = data
@@ -138,14 +146,82 @@ namespace Aqar.Infrastructure.Repositories.Hompage
                     city = x.Street.City.Name,
                     country = x.Street.City.Country.Name,
                     MainImage = x.MainImage,
+                    CreateAt = x.CreateAt,
+
                 }).ToList();
 
+            var store = data
+              .Where(x => x.EstateType == EstateType.Store)
+              .OrderBy(content => content.CreateAt)
+              .Take(5)
+                .Select(x => new GetEstateDto
+                {
+                    Id = x.Id,
+                    OwnerEstate = x.User.GetFullName(),
+                    UserImage = x.User.UserImage,
+                    EstateType = x.DisplayEstateType,
+                    ContractType = x.DisplayContractType,
+                    Price = x.Price,
+                    Area = x.Area,
+                    Description = x.Description,
+                    street = x.Street.Name,
+                    city = x.Street.City.Name,
+                    country = x.Street.City.Country.Name,
+                    MainImage = x.MainImage,
+                    CreateAt = x.CreateAt,
+
+                }).ToList();
+            var room = data
+              .Where(x => x.EstateType == EstateType.Room)
+              .OrderBy(content => content.CreateAt)
+              .Take(5)
+                .Select(x => new GetEstateDto
+                {
+                    Id = x.Id,
+                    OwnerEstate = x.User.GetFullName(),
+                    UserImage = x.User.UserImage,
+                    EstateType = x.DisplayEstateType,
+                    ContractType = x.DisplayContractType,
+                    Price = x.Price,
+                    Area = x.Area,
+                    Description = x.Description,
+                    street = x.Street.Name,
+                    city = x.Street.City.Name,
+                    country = x.Street.City.Country.Name,
+                    MainImage = x.MainImage,
+                    CreateAt = x.CreateAt,
+
+                }).ToList();
+            var garage = data
+              .Where(x => x.EstateType == EstateType.Garage)
+              .OrderBy(content => content.CreateAt)
+              .Take(5)
+                .Select(x => new GetEstateDto
+                {
+                    Id = x.Id,
+                    OwnerEstate = x.User.GetFullName(),
+                    UserImage = x.User.UserImage,
+                    EstateType = x.DisplayEstateType,
+                    ContractType = x.DisplayContractType,
+                    Price = x.Price,
+                    Area = x.Area,
+                    Description = x.Description,
+                    street = x.Street.Name,
+                    city = x.Street.City.Name,
+                    country = x.Street.City.Country.Name,
+                    MainImage = x.MainImage,
+                    CreateAt = x.CreateAt,
+
+                }).ToList();
             return new EstateData{
                 BuildingEstate=bulid,
                 AppartmentEstate=appartment,
-                WarehouseEstate=warehouse,  
+                OfficeEstate=office,  
                 LandEstate=land,
                 ChaletEstate=chalet,
+                StoreEstate=store,
+                RoomEstate=room,
+                GarageEstate=garage,
 
             };
         }

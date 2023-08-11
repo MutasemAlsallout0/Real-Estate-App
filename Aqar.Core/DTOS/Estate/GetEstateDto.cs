@@ -3,7 +3,11 @@ namespace Aqar.Core.DTOS.Estate
     public class GetEstateDto
     {
         public int Id { get; set; }
+        public bool IsOwner { get; set; }
+        public DateTime CreateAt { get; set; } 
+
         public string OwnerEstate { get; set; }
+        public string PhoneNumber { get; set; }
         public string? UserImage { get; set; }
         public string EstateType { get; set; }
         public string ContractType { get; set; }

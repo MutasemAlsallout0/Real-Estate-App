@@ -46,10 +46,10 @@ namespace Aqar.Controllers
         }
 
         [HttpGet]
-        [Route("api/estate/getAllEstate/{Id}")]
+        [Route("api/estate/getEstate/{Id}")]
         public async Task<IActionResult> GetEstate(int Id)
         {
-            return Ok(await _estateRepository.GetEstate(Id));
+            return Ok(await _estateRepository.GetEstate(LoggedInUser, Id));
         }
 
         [HttpPost]
@@ -73,7 +73,7 @@ namespace Aqar.Controllers
                 }
                 await _estateRepository.AddAttachment(attachments);
             }
-            return Ok("تم اضافة العقار للمراجعة");
+            return Ok("تم اضافة العقار بنجاح");
         }
 
 

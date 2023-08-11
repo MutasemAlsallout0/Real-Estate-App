@@ -12,8 +12,12 @@ namespace Aqar.Core.DTOS.HomePage
     {
         public List<GetEstateDto> BuildingEstate { get; set; }
         public List<GetEstateDto> AppartmentEstate { get; set; }
-        public List<GetEstateDto> WarehouseEstate { get; set; }
+        public List<GetEstateDto> OfficeEstate { get; set; }
         public List<GetEstateDto> LandEstate { get; set; }
         public List<GetEstateDto> ChaletEstate { get; set; }
+        public List<GetEstateDto> StoreEstate { get; set; }
+        public List<GetEstateDto> RoomEstate { get; set; }
+        public List<GetEstateDto> GarageEstate { get; set; }
+
     }
 }
