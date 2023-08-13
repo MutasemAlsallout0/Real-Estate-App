@@ -1,4 +1,5 @@
-﻿using Aqar.Core.DTOS.Auth.Request;
+﻿using Aqar.Core.DTOS.ApiBase;
+using Aqar.Core.DTOS.Auth.Request;
 using Aqar.Core.DTOS.Auth.Response;
 using Aqar.Core.Enums;
 using Aqar.Data.DataLayer;
@@ -9,6 +10,7 @@ using Aqar.Infrastructure.HelperServices.ImageHelper;
 using Aqar.Infrastructure.Repositories.PublicPage;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.ComponentModel.DataAnnotations;
@@ -50,9 +52,17 @@ namespace Aqar.Infrastructure.Managers.Auth
         public async Task<AuthenticationResponse> RegisterCustomer(CustomerRegisterRequest model)
         {
 
-            var checkFromDbUser = _context.Users.Any(x => x.Email.Equals(model.Email));
+            var checkFromDbUser = await _context.Users.FirstOrDefaultAsync(x => x.Email.Equals(model.Email));
 
-            if (checkFromDbUser) throw new ServiceValidationException("انت لديك حساب مسبقا");
+            if (checkFromDbUser != null)
+            {
+                if (!checkFromDbUser.IsActive)
+                {
+                    throw new ServiceValidationException("تم إيقاف الحساب. يرجى التواصل مع الدعم لاستعادته.");
+                }
+
+                throw new ServiceValidationException("انت لديك حساب مسبقا");
+            }
 
 
             var user = new AppUser()
@@ -76,7 +86,81 @@ namespace Aqar.Infrastructure.Managers.Auth
             var emailDto = new EmailDto();
             emailDto.To = user.Email;
             emailDto.Subject = "Thank you for the registration";
-            emailDto.Body = $"Click the button below to verify your email and activate your account:<br/><br/><a href=\"{verificationUrl}\" style=\"display:inline-block;background-color:#007bff;color:#fff;text-decoration:none;padding:10px 20px;border-radius:4px;\">Verify Email</a>";
+            //  emailDto.Body = $"Click the button below to verify your email and activate your account:<br/><br/><a href=\"{verificationUrl}\" style=\"display:inline-block;background-color:#007bff;color:#fff;text-decoration:none;padding:10px 20px;border-radius:4px;\">Verify Email</a>";
+            emailDto.Body = $@"
+        <!doctype html>
+        <html lang=""en-US"">
+        <head>
+            <meta content=""text/html; charset=utf-8"" http-equiv=""Content-Type"" />
+            <title>Confirm Account Registration</title>
+            <style type=""text/css"">
+                a:hover {{text-decoration: underline !important;}}
+            </style>
+        </head>
+        <body marginheight=""0"" topmargin=""0"" marginwidth=""0"" style=""margin: 0px; background-color: #f2f3f8;"" leftmargin=""0"">
+            <!--100% body table-->
+            <table cellspacing=""0"" border=""0"" cellpadding=""0"" width=""100%"" bgcolor=""#f2f3f8""
+                style=""@import url(https://fonts.googleapis.com/css?family=Rubik:300,400,500,700|Open+Sans:300,400,600,700); font-family: 'Open Sans', sans-serif;"">
+                <tr>
+                    <td>
+                        <table style=""background-color: #f2f3f8; max-width:670px;  margin:0 auto;"" width=""100%"" border=""0""
+                            align=""center"" cellpadding=""0"" cellspacing=""0"">
+                            <tr>
+                                <td style=""height:80px;"">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td style=""text-align:center;"">
+                                    <a href=""https://example.com"" title=""logo"" target=""_blank"">
+                                        <img width=""60"" src=""~/Repeat Grid 1.svg"" title=""logo"" alt=""logo"">
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style=""height:20px;"">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <table width=""95%"" border=""0"" align=""center"" cellpadding=""0"" cellspacing=""0""
+                                        style=""max-width:670px;background:#fff; border-radius:3px; text-align:center;-webkit-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06);"">
+                                        <tr>
+                                            <td style=""height:40px;"">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td style=""padding:0 35px;"">
+                                                <h1 style=""color:#1e1e2d; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;"">Welcome to our community!</h1>
+                                                <span
+                                                    style=""display:inline-block; vertical-align:middle; margin:29px 0 26px; border-bottom:1px solid #cecece; width:100px;""></span>
+                                                <p style=""color:#455056; font-size:15px;line-height:24px; margin:0;"">
+                                                    Thank you for registering an account with us. To activate your account, please click the following link:
+                                                </p>
+                                                <a href=""{verificationUrl}""
+                                                    style=""background:#20e277;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;"">Confirm Account</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style=""height:40px;"">&nbsp;</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            <tr>
+                                <td style=""height:20px;"">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td style=""text-align:center;"">
+                                    <p style=""font-size:14px; color:rgba(69, 80, 86, 0.7411764705882353); line-height:18px; margin:0 0 0;"">&copy; <strong>www.example.com</strong></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style=""height:80px;"">&nbsp;</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+            <!--/100% body table-->
+        </body>
+        </html>
+    ";
             _emailService.SendEmail(emailDto);
             user.EmailConfirmed = true;
             user.IsActive = true;
@@ -112,18 +196,22 @@ namespace Aqar.Infrastructure.Managers.Auth
             throw new ServiceValidationException("تاكد من بيانات التسجيل");
 
         }
-        private string GenerateRandomVerificationCode()
-        {
-            Random random = new Random();
-            return random.Next(100000, 999999).ToString();
-        }
+ 
         public async Task<AuthenticationResponse> RegisterOfficeOwner(OfficeOwnerRegisterRequest model)
         {
 
 
-            var checkFromDbUser = _context.Users.Any(x => x.Email.Equals(model.Email));
+            var checkFromDbUser = await _context.Users.FirstOrDefaultAsync(x => x.Email.ToLower().Equals(model.Email.ToLower()));
 
-            if (checkFromDbUser) throw new ServiceValidationException("انت لديك حساب مسبقا");
+            if (checkFromDbUser != null)
+            {
+                if (!checkFromDbUser.IsActive)
+                {
+                    throw new ServiceValidationException("تم إيقاف الحساب. يرجى التواصل مع الدعم لاستعادته.");
+                }
+
+                throw new ServiceValidationException("انت لديك حساب مسبقا");
+            }
 
             var user = new AppUser()
                 {
@@ -150,8 +238,82 @@ namespace Aqar.Infrastructure.Managers.Auth
                 var emailDto = new EmailDto();
                 emailDto.To = user.Email;
                 emailDto.Subject = "Thank you for the registration";
-                emailDto.Body = $"Click the button below to verify your email and activate your account:<br/><br/><a href=\"{verificationUrl}\" style=\"display:inline-block;background-color:#007bff;color:#fff;text-decoration:none;padding:10px 20px;border-radius:4px;\">Verify Email</a>";
-                _emailService.SendEmail(emailDto);
+               // emailDto.Body = $"Click the button below to verify your email and activate your account:<br/><br/><a href=\"{verificationUrl}\" style=\"display:inline-block;background-color:#007bff;color:#fff;text-decoration:none;padding:10px 20px;border-radius:4px;\">Verify Email</a>";
+               emailDto.Body= $@"
+        <!doctype html>
+        <html lang=""en-US"">
+        <head>
+            <meta content=""text/html; charset=utf-8"" http-equiv=""Content-Type"" />
+            <title>Confirm Account Registration</title>
+            <style type=""text/css"">
+                a:hover {{text-decoration: underline !important;}}
+            </style>
+        </head>
+        <body marginheight=""0"" topmargin=""0"" marginwidth=""0"" style=""margin: 0px; background-color: #f2f3f8;"" leftmargin=""0"">
+            <!--100% body table-->
+            <table cellspacing=""0"" border=""0"" cellpadding=""0"" width=""100%"" bgcolor=""#f2f3f8""
+                style=""@import url(https://fonts.googleapis.com/css?family=Rubik:300,400,500,700|Open+Sans:300,400,600,700); font-family: 'Open Sans', sans-serif;"">
+                <tr>
+                    <td>
+                        <table style=""background-color: #f2f3f8; max-width:670px;  margin:0 auto;"" width=""100%"" border=""0""
+                            align=""center"" cellpadding=""0"" cellspacing=""0"">
+                            <tr>
+                                <td style=""height:80px;"">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td style=""text-align:center;"">
+                                    <a href=""https://example.com"" title=""logo"" target=""_blank"">
+                                        <img width=""60"" src=""https://i.ibb.co/hL4XZp2/android-chrome-192x192.png"" title=""logo"" alt=""logo"">
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style=""height:20px;"">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <table width=""95%"" border=""0"" align=""center"" cellpadding=""0"" cellspacing=""0""
+                                        style=""max-width:670px;background:#fff; border-radius:3px; text-align:center;-webkit-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06);"">
+                                        <tr>
+                                            <td style=""height:40px;"">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td style=""padding:0 35px;"">
+                                                <h1 style=""color:#1e1e2d; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;"">Welcome to our community!</h1>
+                                                <span
+                                                    style=""display:inline-block; vertical-align:middle; margin:29px 0 26px; border-bottom:1px solid #cecece; width:100px;""></span>
+                                                <p style=""color:#455056; font-size:15px;line-height:24px; margin:0;"">
+                                                    Thank you for registering an account with us. To activate your account, please click the following link:
+                                                </p>
+                                                <a href=""{verificationUrl}""
+                                                    style=""background:#20e277;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;"">Confirm Account</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style=""height:40px;"">&nbsp;</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            <tr>
+                                <td style=""height:20px;"">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td style=""text-align:center;"">
+                                    <p style=""font-size:14px; color:rgba(69, 80, 86, 0.7411764705882353); line-height:18px; margin:0 0 0;"">&copy; <strong>www.example.com</strong></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style=""height:80px;"">&nbsp;</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+            <!--/100% body table-->
+        </body>
+        </html>
+    ";
+            _emailService.SendEmail(emailDto);
                 user.EmailConfirmed = true; 
                 user.IsActive = true;
                 var result = await _userManager.CreateAsync(user, model.Password);
@@ -180,7 +342,7 @@ namespace Aqar.Infrastructure.Managers.Auth
 
             var user = await _userManager.FindByEmailAsync(request.email);
 
-            if (user != null && await _userManager.CheckPasswordAsync(user, request.password))
+            if (user != null && await _userManager.CheckPasswordAsync(user, request.password) && user.IsActive == true)
             {
 
                 var token = await Generate(user);
@@ -248,12 +410,88 @@ namespace Aqar.Infrastructure.Managers.Auth
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             var emailDto = new EmailDto();
             // إرسال رابط إعادة تعيين كلمة المرور عبر البريد
-            var resetLink = $"https://your-domain.com/reset-password?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}";
+            var resetLink = $"http://localhost:4200/reset-password?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}";
 
             emailDto.To = user.Email;
             emailDto.Subject = "إعادة تعيين كلمة المرور";
-            emailDto.Body = $"يرجى النقر على الرابط التالي لإعادة تعيين كلمة المرور: {resetLink}";
-             _emailService.SendEmail(emailDto);
+         //   emailDto.Body = $"يرجى النقر على الرابط التالي لإعادة تعيين كلمة المرور: {resetLink}";
+         emailDto.Body = $@"
+        <!doctype html>
+        <html lang=""en-US"">
+        <head>
+            <meta content=""text/html; charset=utf-8"" http-equiv=""Content-Type"" />
+            <title>Reset Password Email Template</title>
+            <meta name=""description"" content=""Reset Password Email Template."">
+            <style type=""text/css"">
+                a:hover {{text-decoration: underline !important;}}
+            </style>
+        </head>
+        <body marginheight=""0"" topmargin=""0"" marginwidth=""0"" style=""margin: 0px; background-color: #f2f3f8;"" leftmargin=""0"">
+            <!--100% body table-->
+            <table cellspacing=""0"" border=""0"" cellpadding=""0"" width=""100%"" bgcolor=""#f2f3f8""
+                style=""@import url(https://fonts.googleapis.com/css?family=Rubik:300,400,500,700|Open+Sans:300,400,600,700); font-family: 'Open Sans', sans-serif;"">
+                <tr>
+                    <td>
+                        <table style=""background-color: #f2f3f8; max-width:670px;  margin:0 auto;"" width=""100%"" border=""0""
+                            align=""center"" cellpadding=""0"" cellspacing=""0"">
+                            <tr>
+                                <td style=""height:80px;"">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td style=""text-align:center;"">
+                                    <a href=""http://aqar2023-001-site1.atempurl.com"" title=""logo"" target=""_blank"">
+                                        <img width=""60"" src=""http://aqar2023-001-site1.atempurl.com/images/logo.svg"" title=""logo"" alt=""logo"">
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style=""height:20px;"">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <table width=""95%"" border=""0"" align=""center"" cellpadding=""0"" cellspacing=""0""
+                                        style=""max-width:670px;background:#fff; border-radius:3px; text-align:center;-webkit-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06);"">
+                                        <tr>
+                                            <td style=""height:40px;"">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td style=""padding:0 35px;"">
+                                                <h1 style=""color:#1e1e2d; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;"">لقد طلبت إعادة تعيين كلمة المرور</h1>
+                                                <span
+                                                    style=""display:inline-block; vertical-align:middle; margin:29px 0 26px; border-bottom:1px solid #cecece; width:100px;""></span>
+                                                <p style=""color:#455056; font-size:15px;line-height:24px; margin:0;"">
+                                                   لا يمكننا ببساطة أن نرسل لك كلمة المرور القديمة. تم إنشاء رابط فريد لإعادة تعيين كلمة المرور الخاصة بك. لإعادة تعيين كلمة المرور الخاصة بك ، انقر فوق الارتباط التالي واتبع التعليمات
+                                                </p>
+                                                <a href=""{resetLink}""
+                                                    style=""background:#20e277;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;"">Reset
+                                                    Password</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style=""height:40px;"">&nbsp;</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            <tr>
+                                <td style=""height:20px;"">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td style=""text-align:center;"">
+                                    <p style=""font-size:14px; color:rgba(69, 80, 86, 0.7411764705882353); line-height:18px; margin:0 0 0;"">&copy; <strong>عقار 2023</strong></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style=""height:80px;"">&nbsp;</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+            <!--/100% body table-->
+        </body>
+        </html>
+    ";
+            _emailService.SendEmail(emailDto);
 
             return true;
         }
@@ -292,9 +530,34 @@ namespace Aqar.Infrastructure.Managers.Auth
             return false;
         }
 
-        public async Task<string> UpdateOfficeOwner(UpdateOfficeOwnerDto updateOfficeOwnerDto)
+        public async Task<string> ChangePassword(UserModel cuurentUser, ChangePasswordDto changePasswordDto)
         {
-            var userDb = await _userManager.FindByIdAsync(updateOfficeOwnerDto.UserId);
+            var user = await _userManager.FindByIdAsync(cuurentUser.Id);
+
+            if (user == null)
+            {
+                throw new ServiceValidationException("User not found.");
+            }
+            var passwordHasher = new PasswordHasher<AppUser>();
+            var passwordResult = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, changePasswordDto.oldPassword);
+
+            if (passwordResult != PasswordVerificationResult.Success)
+            {
+                throw new ServiceValidationException("Old password is incorrect.");
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, changePasswordDto.newPassword);
+
+            if (!result.Succeeded) throw new ServiceValidationException("Password change failed.");
+
+            return "Password changed successfully.";
+
+        }
+
+        public async Task<string> UpdateOfficeOwner(UserModel cuurentUser, UpdateOfficeOwnerDto updateOfficeOwnerDto)
+        {
+            var userDb = await _userManager.FindByIdAsync(cuurentUser.Id);
             if (userDb == null) throw new ServiceValidationException("المستخدم غير موجود");
 
             userDb.Email = updateOfficeOwnerDto.Email;
@@ -315,9 +578,9 @@ namespace Aqar.Infrastructure.Managers.Auth
             return "تم تعديل بياناتك بنجاح";
         }
 
-        public async Task<string> UpdateCustomer(UpdateCustomerrDto updateCustomerrDto)
+        public async Task<string> UpdateCustomer(UserModel cuurentUser, UpdateCustomerrDto updateCustomerrDto)
         {
-            var userDb = await _userManager.FindByIdAsync(updateCustomerrDto.UserId);
+            var userDb = await _userManager.FindByIdAsync(cuurentUser.Id);
             if (userDb == null) throw new ServiceValidationException("المستخدم غير موجود");
 
             userDb.Email = updateCustomerrDto.Email;
@@ -370,6 +633,24 @@ namespace Aqar.Infrastructure.Managers.Auth
         //        _emailService.SendEmail(emailDto);
         //    }
 
+
+
+        public async Task<GetUserProfileDto> GetUserProfil(UserModel cuurentUser)
+        {
+            var getInfo = await _context.Users.Select(x => new GetUserProfileDto
+            {
+                Id =x.Id,
+                FirstName = x.FirstName,
+                LastName = x.LastName,
+                PhoneNumber = x.PhoneNumber,
+                OfficeName = x.OfficeName,
+                UserImage = x.UserImage,
+                Email = x.Email
+
+            }).FirstOrDefaultAsync(x => x.Id == cuurentUser.Id);
+
+            return getInfo;
+        }
 
         public async Task<bool> DeleteUser(string userId)
         {

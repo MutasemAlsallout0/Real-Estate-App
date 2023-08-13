@@ -1,4 +1,5 @@
-﻿using Aqar.Core.DTOS.Auth.Request;
+﻿using Aqar.Core.DTOS.ApiBase;
+using Aqar.Core.DTOS.Auth.Request;
 using Aqar.Core.DTOS.Auth.Response;
 using Aqar.Data.Model;
 using Microsoft.AspNetCore.Identity;
@@ -14,8 +15,10 @@ namespace Aqar.Infrastructure.Managers.Auth
         Task<AuthenticationResponse> Login(LoginRequest request);
         Task<bool> SendResetPasswordEmailAsync(string email);
         Task<bool> ResetPasswordAsync(RestPAssword restPAssword);
-        Task<string> UpdateOfficeOwner(UpdateOfficeOwnerDto updateOfficeOwnerDto);
-        Task<string> UpdateCustomer(UpdateCustomerrDto updateCustomerrDto);
+        Task<string> ChangePassword(UserModel cuurentUser, ChangePasswordDto changePasswordDto);
+        Task<string> UpdateOfficeOwner(UserModel cuurentUser, UpdateOfficeOwnerDto updateOfficeOwnerDto);
+        Task<string> UpdateCustomer(UserModel cuurentUser, UpdateCustomerrDto updateCustomerrDto);
+        Task<GetUserProfileDto> GetUserProfil(UserModel cuurentUser);
         Task<bool> DeleteUser(string userId);
     }
 }

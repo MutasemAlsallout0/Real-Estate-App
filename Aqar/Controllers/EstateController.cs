@@ -1,6 +1,5 @@
 ﻿using Aqar.Core.DTOS.Estate;
 using Aqar.Core.Enums;
-using Aqar.Data.DataLayer;
 using Aqar.Data.Model;
 using Aqar.Infrastructure.HelperServices.ImageHelper;
 using Aqar.Infrastructure.Repositories.Estate;
@@ -24,12 +23,14 @@ namespace Aqar.Controllers
 
 
         [HttpGet]
+        [AllowAnonymous]
         [Route("api/estate/getCountries")]
         public async Task<IActionResult> GetCountries()
         {
             return Ok(await _estateRepository.GetCountries());
         }
 
+        [AllowAnonymous]
         [HttpGet]
         [Route("api/estate/getCities/{countryId}")]
         public async Task<IActionResult> GetCities(int countryId)

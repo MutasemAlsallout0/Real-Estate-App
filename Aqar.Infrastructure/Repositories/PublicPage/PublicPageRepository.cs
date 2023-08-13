@@ -96,7 +96,8 @@ namespace Aqar.Infrastructure.Repositories.PublicPage
                     country = x.Street.City.Country.Name,
                     MainImage = x.MainImage,
                     CreateAt = x.CreateAt,
-                    IsOwner = true
+                    IsOwner = true,
+                    UserType = x.User.UserType.ToString()
                 })
                 .ToListAsync();
 

@@ -57,6 +57,7 @@ namespace Aqar.Infrastructure.Repositories.Hompage
                     country = x.Street.City.Country.Name,
                     MainImage = x.MainImage,
                     CreateAt = x.CreateAt,
+                    UserId = x.User.Id,
 
                 })
                 .ToList();
@@ -80,6 +81,7 @@ namespace Aqar.Infrastructure.Repositories.Hompage
                     country = x.Street.City.Country.Name,
                     MainImage = x.MainImage,
                     CreateAt = x.CreateAt,
+                    UserId = x.User.Id,
 
                 }).ToList();
 
@@ -102,6 +104,7 @@ namespace Aqar.Infrastructure.Repositories.Hompage
                     country = x.Street.City.Country.Name,
                     MainImage = x.MainImage,
                     CreateAt = x.CreateAt,
+                    UserId = x.User.Id,
 
                 }).ToList();
 
@@ -125,6 +128,7 @@ namespace Aqar.Infrastructure.Repositories.Hompage
                     country = x.Street.City.Country.Name,
                     MainImage = x.MainImage,
                     CreateAt = x.CreateAt,
+                    UserId = x.User.Id,
 
                 }).ToList();
 
@@ -147,6 +151,7 @@ namespace Aqar.Infrastructure.Repositories.Hompage
                     country = x.Street.City.Country.Name,
                     MainImage = x.MainImage,
                     CreateAt = x.CreateAt,
+                    UserId = x.User.Id,
 
                 }).ToList();
 
@@ -169,6 +174,7 @@ namespace Aqar.Infrastructure.Repositories.Hompage
                     country = x.Street.City.Country.Name,
                     MainImage = x.MainImage,
                     CreateAt = x.CreateAt,
+                    UserId = x.User.Id,
 
                 }).ToList();
             var room = data
@@ -190,6 +196,7 @@ namespace Aqar.Infrastructure.Repositories.Hompage
                     country = x.Street.City.Country.Name,
                     MainImage = x.MainImage,
                     CreateAt = x.CreateAt,
+                    UserId = x.User.Id,
 
                 }).ToList();
             var garage = data
@@ -211,6 +218,7 @@ namespace Aqar.Infrastructure.Repositories.Hompage
                     country = x.Street.City.Country.Name,
                     MainImage = x.MainImage,
                     CreateAt = x.CreateAt,
+                    UserId = x.User.Id,
 
                 }).ToList();
             return new EstateData{

@@ -72,7 +72,6 @@ Log.Logger = new LoggerConfiguration()
                 .CreateLogger();
 var environment = app.Services.GetRequiredService<IWebHostEnvironment>();
 app.ConfigureExceptionHandler(Log.Logger, environment);
-
 app.UseStaticFiles();
 app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
@@ -82,7 +81,8 @@ app.UseAuthorization();
 
 
 app.MapControllers();
+app.MapFallbackToFile("index.html");
 
- await app.Initialize();
+await app.Initialize();
 
 app.Run();

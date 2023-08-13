@@ -1,4 +1,5 @@
-﻿using Aqar.Core.DTOS.Auth.Request;
+﻿using Aqar.Core.DTOS.ApiBase;
+using Aqar.Core.DTOS.Auth.Request;
 using Aqar.Data.DataLayer;
 using Aqar.Infrastructure.Managers.Auth;
 using DocumentFormat.OpenXml.Vml.Office;
@@ -9,7 +10,7 @@ using static Aqar.Infrastructure.Managers.Auth.AuthRepository;
 namespace Aqar.Controllers
 {
     [ApiController]
-    public class AccountController : ControllerBase
+    public class AccountController : ApiBaseController
     {
         private readonly IAuthRepository _authRepository;
         public AccountController(IAuthRepository authRepository)
@@ -77,12 +78,21 @@ namespace Aqar.Controllers
             return BadRequest(new { Message = "فشل في إعادة تعيين كلمة المرور. يُرجى التحقق من صحة الرابط وإدخال كلمة مرور جديدة صحيحة." });
         }
 
+        [HttpPost]
+        [Route("api/account/changePassword")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDto changePasswordDto)
+        {
+            return Ok(await _authRepository.ChangePassword(LoggedInUser, changePasswordDto));
+
+        }
+
         [HttpPut]
         [Route("api/account/updateOfficeOwner")]
         [Authorize(Roles = RolesName.OfficeOwner)]
         public async Task<IActionResult> UpdateOfficeOwner([FromForm] UpdateOfficeOwnerDto updateOfficeOwnerDto)
         {
-            return Ok(await _authRepository.UpdateOfficeOwner(updateOfficeOwnerDto));
+            return Ok(await _authRepository.UpdateOfficeOwner(LoggedInUser, updateOfficeOwnerDto));
 
         }
 
@@ -92,13 +102,22 @@ namespace Aqar.Controllers
         [Authorize(Roles = RolesName.Customer)]
         public async Task<IActionResult> UpdateCustomer([FromForm] UpdateCustomerrDto updateCustomerrDto)
         {
-            return Ok(await _authRepository.UpdateCustomer(updateCustomerrDto));
+            return Ok(await _authRepository.UpdateCustomer(LoggedInUser, updateCustomerrDto));
+
+        }
+        
+        [HttpGet]
+        [Route("api/account/getUserProfil")]
+        [Authorize]
+        public async Task<IActionResult> GetUserProfil()
+        {
+            return Ok(await _authRepository.GetUserProfil(LoggedInUser));
 
         }
 
         [HttpDelete]
         [Route("api/account/deleteAccount")]
-
+        [Authorize]
         public async Task<IActionResult> DeleteAccount(string userId)
         {
             return Ok(await _authRepository.DeleteUser(userId));

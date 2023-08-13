@@ -1,0 +1,19 @@
+/* ----------------------------------------------------------------------------------------------------- */
+/*  @ Main Tailwind file for injecting utilities.
+/* ----------------------------------------------------------------------------------------------------- */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+input.office-input::placehorder{
+    font-size: 30px !important;
+    width: 100%;
+    font-family: 'Cairo-bold' !important;
+}
+input.office-input:focus-visible{
+    outline: 0px !important;
+}
+
+.app.blue .mdc-text-field:not(.mdc-text-field--disabled) .mdc-floating-label{
+    transform : var( --mat-mdc-form-field-label-transform, translateY(-50%) translateX(calc(1 * (50px + var(--mat-mdc-form-field-label-offset-x, 0px)))) )!important;
+}

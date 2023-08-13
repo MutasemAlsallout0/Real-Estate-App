@@ -69,6 +69,7 @@ namespace Aqar.Infrastructure.Repositories.Estate
                                          country = x.Street.City.Country.Name,
                                          MainImage = x.MainImage,
                                          CreateAt = x.CreateAt,
+                                         UserId = x.UserId,
                                      })
                                      .ToListAsync();
 
@@ -108,6 +109,7 @@ namespace Aqar.Infrastructure.Repositories.Estate
                 MainImage = estate.MainImage,
                 UserImage = estate.User.UserImage,
                 PhoneNumber = estate.User.PhoneNumber,
+                UserId = estate.User.Id,
                  CreateAt = estate.CreateAt,
 
             };
