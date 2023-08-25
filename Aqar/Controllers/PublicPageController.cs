@@ -32,6 +32,15 @@ namespace Aqar.Controllers
             return Ok(estatesWithOfficeDetails);
         }
 
+        [HttpGet]
+        [Route("api/publicPage/getEstatesForAnyUser")]
+        public async Task<IActionResult> GetEstatesForAnyUser(string UserId)
+        {
+            var getEstatesForAnyUser = await _publicPageRepository.GetEstatesForAnyUser(UserId);
+
+            return Ok(getEstatesForAnyUser);
+        }
+
         [HttpPost]
         [Route("api/publicPage/followPublicPage")]
         [Authorize]

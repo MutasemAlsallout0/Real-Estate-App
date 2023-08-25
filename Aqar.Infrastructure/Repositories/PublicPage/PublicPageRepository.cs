@@ -1,4 +1,5 @@
 ﻿using Aqar.Core.DTOS.ApiBase;
+using Aqar.Core.DTOS.Auth.Response;
 using Aqar.Core.DTOS.Estate;
 using Aqar.Core.Enums;
 using Aqar.Data.DataLayer;
@@ -43,15 +44,30 @@ namespace Aqar.Infrastructure.Repositories.PublicPage
             }
         }
 
-        public async Task<PagedResult<AppUser>> SearchOfficesByNameAsync(string? officeName, int page, int pageSize)
+        public async Task<PagedResult<GetUserProfileDto>> SearchOfficesByNameAsync(string? officeName, int page, int pageSize)
         {
-            IQueryable<AppUser> query = _context.Users
-                .Where(u => u.UserType == UserType.OfficeOwner && u.OfficeName.Contains(officeName));
+            IQueryable<AppUser> query = _context.Users.Where(u => u.UserType == UserType.OfficeOwner).AsQueryable();
+
+            if(officeName != null)
+            {
+                query = query.Where(u =>  u.OfficeName.Contains(officeName));
+            }
 
             int totalCount = await query.CountAsync();
-            List<AppUser> offices = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            var offices = await query.Skip((page - 1) * pageSize).Take(pageSize).Select(x => new GetUserProfileDto
+            {
+                Id = x.Id,
+                FirstName = x.FirstName,
+                LastName = x.LastName,
+                PhoneNumber = x.PhoneNumber,
+                OfficeName = x.OfficeName,
+                UserImage = x.UserImage,
+                Email = x.Email,
+ 
 
-            return new PagedResult<AppUser>(offices, totalCount);
+            }).ToListAsync();
+
+            return new PagedResult<GetUserProfileDto>(offices, totalCount);
         }
 
         public async Task<Data.Model.PublicPage> CreatePublicPageForOfficeOwner(string userId)
@@ -145,22 +161,58 @@ namespace Aqar.Infrastructure.Repositories.PublicPage
 
 
         }
-        public class EstateWithOfficeDetails
+
+        public async Task<GetEsataesForUserDto> GetEstatesForAnyUser(string UserId)
         {
-            public int EstateId { get; set; }
-            public EstateType EstateType { get; set; }
-            public ContractType ContractType { get; set; }
-            public double Price { get; set; }
-            public double Area { get; set; }
-            public string Description { get; set; } = string.Empty;
-            public bool SeenByAdmin { get; set; }
-            public List<Attachment> Images { get; set; }
-            public string OfficeId { get; set; }
-            public string OfficeName { get; set; }
-            public string OfficeImage { get; set; }
+            var estatesWithOfficeDetails = await _context.Estates.Include(z => z.User)
+                .Include(x => x.Street).ThenInclude(x => x.City).ThenInclude(x => x.Country)
+                .Where(e => e.UserId == UserId)
+                .ToListAsync();
+
+            var estateDetailsList = new List<GetEstateDto>();
+
+            var followersCount = await _context.PublicPages
+                             .CountAsync(pf => pf.UserId == UserId);
+            var userDetails = estatesWithOfficeDetails.Select(x =>  new GetUserDto
+            {
+                Id = x.User.Id,
+                FullName = x.User.GetFullName(),
+                UserImage = x.User.UserImage,
+                UserType = x.User.UserType.ToString(),
+                FollowersCount = followersCount
+            }).FirstOrDefault();
+
+            foreach (var x in estatesWithOfficeDetails)
+            {
+
+                var estateDetails = new GetEstateDto
+                {
+                    Id = x.Id,
+                    OwnerEstate = x.User.GetFullName(),
+                    UserImage = x.User.UserImage,
+                    EstateType = x.DisplayEstateType,
+                    ContractType = x.DisplayContractType,
+                    Price = x.Price,
+                    Area = x.Area,
+                    Description = x.Description,
+                    street = x.Street.Name,
+                    city = x.Street.City.Name,
+                    country = x.Street.City.Country.Name,
+                    MainImage = x.MainImage,
+                    CreateAt = x.CreateAt,
+                    IsOwner = true,
+                    UserType = x.User.UserType.ToString(),
+                 };
+
+                estateDetailsList.Add(estateDetails);
+            }
+            var data = new GetEsataesForUserDto
+            {
+                GetUserInfo = userDetails,
+                GetEstates = estateDetailsList
+            };
+            return data;
         }
-
-
 
 
 

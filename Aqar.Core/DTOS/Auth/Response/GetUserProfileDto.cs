@@ -10,5 +10,6 @@ namespace Aqar.Core.DTOS.Auth.Response
         public string UserImage { get; set; }
         public string PhoneNumber { get; set; }
         public string OfficeName { get; set; }
+ 
     }
 }

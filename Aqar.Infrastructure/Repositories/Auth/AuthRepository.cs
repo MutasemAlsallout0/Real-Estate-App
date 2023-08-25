@@ -407,10 +407,10 @@ namespace Aqar.Infrastructure.Managers.Auth
                 return false;
             }
 
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var token =await Generate(user);
             var emailDto = new EmailDto();
             // إرسال رابط إعادة تعيين كلمة المرور عبر البريد
-            var resetLink = $"http://localhost:4200/reset-password?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}";
+            var resetLink = $"http://localhost:4200/login?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token.Token)}";
 
             emailDto.To = user.Email;
             emailDto.Subject = "إعادة تعيين كلمة المرور";

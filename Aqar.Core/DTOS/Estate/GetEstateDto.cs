@@ -1,3 +1,4 @@
+using Aqar.Core.DTOS.Auth.Response;
 using Aqar.Core.Enums;
 
 namespace Aqar.Core.DTOS.Estate
@@ -23,5 +24,6 @@ namespace Aqar.Core.DTOS.Estate
 
         public string MainImage { get; set; }
         public List<string> Images { get; set; }
+ 
     }
 }

@@ -187,7 +187,7 @@ namespace Aqar.Data.Data
                 CreateAt = DateTime.Now,
                 UserType = UserType.Admin,
                 EmailConfirmed = true,
-
+ 
             };
             await userManger.CreateAsync(user, "Admin@2023");
             await userManger.AddToRoleAsync(user, "Admin");
